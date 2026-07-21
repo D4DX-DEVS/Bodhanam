@@ -1,0 +1,474 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Register the runtime-switchable tokens below as real Tailwind color
+   utilities, so hover:/dark:/group-hover:/opacity-modifier variants
+   (e.g. hover:bg-paper, bg-primary/10) actually generate — a bare
+   class like .bg-paper written by hand is invisible to Tailwind's
+   variant engine. */
+@theme {
+  --color-paper: var(--paper);
+  --color-paper-elevated: var(--paper-elevated);
+  --color-paper-light: var(--paper-elevated);
+  --color-ink: var(--ink);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-strong: var(--primary-strong);
+  --color-secondary: var(--secondary);
+  --color-accent-warm: var(--accent-warm);
+  --color-muted: var(--text-muted);
+  --color-default: var(--border);
+  --color-border-subtle: var(--border-subtle);
+}
+
+:root {
+  /* Light theme - Premium editorial palette */
+  --paper: #faf9f7;
+  --paper-elevated: #ffffff;
+  --ink: #0d0c0a;
+  --primary: #1a5f57;
+  --primary-light: #2a7f6f;
+  --primary-strong: #134b44;
+  --secondary: #8b7355;
+  --accent-warm: #d4a574;
+  --border: #e5ddd3;
+  --border-subtle: #f0ede8;
+  --text-muted: #78736b;
+  --header-bg: rgba(250, 249, 247, 0.82);
+  --overlay-grad: linear-gradient(
+    to top,
+    rgba(13, 12, 10, 0.86) 0%,
+    rgba(13, 12, 10, 0.3) 45%,
+    rgba(13, 12, 10, 0) 100%
+  );
+  /* Latest-issue hero: warmer than --paper-elevated, distinguishes it as the masthead surface */
+  --hero-bg: #fcf9f2;
+  --hero-border: #ece3d3;
+  /* Footer is always a dark forest surface, independent of site theme */
+  --footer-bg: #0b211d;
+  --footer-bg-elevated: #123330;
+  --footer-ink: #f3f1ec;
+  --footer-muted: #9fb0aa;
+  --footer-border: rgba(243, 241, 236, 0.12);
+  --footer-accent: #5fc9b8;
+  --leaf: #8ba394;
+  color-scheme: light;
+}
+
+/* Dark theme with class-based strategy */
+.dark {
+  /* Premium dark palette */
+  --paper: #0f0e0c;
+  --paper-elevated: #1a1815;
+  --ink: #f5f2ed;
+  --primary: #4db3a3;
+  --primary-light: #5fc9b8;
+  --primary-strong: #3fa392;
+  --secondary: #c9a87a;
+  --accent-warm: #d4a574;
+  --border: #2d2a25;
+  --border-subtle: #1f1d1a;
+  --text-muted: #b8b3a8;
+  --header-bg: rgba(15, 14, 12, 0.82);
+  --hero-bg: #16140f;
+  --hero-border: #2c2820;
+  --leaf: #4d5f52;
+  color-scheme: dark;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans-ml), "Noto Sans Malayalam", system-ui, sans-serif;
+  line-height: 1.6;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Smooth transitions for theme toggle */
+* {
+  transition-property: background-color, border-color, color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none;
+  }
+}
+
+/* Malayalam text reading support */
+.prose-ml {
+  max-width: 65ch;
+  font-family: var(--font-serif-ml);
+  font-size: 1.0625rem;
+  line-height: 1.9;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.prose-ml h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: var(--ink);
+}
+
+.prose-ml h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--ink);
+}
+
+.prose-ml p {
+  margin-bottom: 1rem;
+}
+
+.prose-ml img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin: 1.5rem auto;
+  display: block;
+}
+
+.prose-ml blockquote {
+  border-left-width: 4px;
+  border-left-color: var(--accent-warm);
+  padding-left: 1.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-style: italic;
+  color: var(--text-muted);
+  margin: 1.5rem 0;
+}
+
+.prose-ml a {
+  color: var(--primary);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.prose-ml a:hover {
+  color: var(--primary-light);
+}
+
+.prose-ml-wide {
+  max-width: 80ch;
+}
+
+.content-card {
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background-color: var(--paper);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.content-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary);
+}
+
+@media (max-width: 640px) {
+  .content-card {
+    padding: 1.25rem;
+  }
+}
+
+/* Utility classes */
+.text-paper {
+  color: var(--paper);
+}
+
+.text-ink {
+  color: var(--ink);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+.text-accent-gold {
+  color: var(--accent-warm);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.bg-paper {
+  background-color: var(--paper);
+}
+
+.bg-primary {
+  background-color: var(--primary);
+}
+
+.border-default {
+  border-color: var(--border);
+}
+
+/* Editorial refined typography */
+.font-serif-ml {
+  font-family: var(--font-serif-ml), "Noto Serif Malayalam", Georgia, serif;
+}
+
+.font-sans-ml {
+  font-family: var(--font-sans-ml), "Noto Sans Malayalam", system-ui, sans-serif;
+}
+
+/* Link styling */
+a {
+  color: var(--primary);
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: var(--primary-light);
+}
+
+/* Focus states for accessibility */
+*:focus-visible {
+  outline-width: 2px;
+  outline-offset: 2px;
+  outline-color: var(--primary);
+}
+
+/* Button styling */
+button:focus-visible {
+  outline-width: 2px;
+  outline-offset: 2px;
+  outline-color: var(--primary);
+}
+
+/* Premium heading sizes */
+h1 {
+  letter-spacing: -0.5px;
+}
+
+h2 {
+  letter-spacing: -0.25px;
+}
+
+h3 {
+  letter-spacing: -0.1px;
+}
+
+/* Article category chip styling */
+.chip {
+  display: inline-block;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.5px;
+  border-radius: 6px;
+  background-color: rgba(26, 95, 87, 0.08);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* Malayalam headings need more breathing room than Latin leading-snug provides */
+.leading-ml-title {
+  line-height: 1.5;
+}
+
+/* Buttons — hover via solid background swap, NOT opacity/transform/filter,
+   which promote a GPU layer and re-rasterize the label (visible text blur). */
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--paper);
+  transition: background-color 0.2s ease;
+}
+.btn-primary:hover {
+  background-color: var(--primary-strong);
+  color: var(--paper);
+}
+.btn-outline {
+  border: 1px solid var(--border);
+  color: var(--ink);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.btn-outline:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.dark .chip {
+  background-color: rgba(77, 179, 163, 0.12);
+}
+
+/* Issue card styling with modern refined look */
+.issue-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--paper-elevated);
+  transition: box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s,
+              transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.issue-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(26, 95, 87, 0.1);
+  transform: translateY(-2px);
+}
+
+.dark .issue-card:hover {
+  box-shadow: 0 8px 24px rgba(77, 179, 163, 0.15);
+}
+
+.issue-card img {
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.issue-card:hover img {
+  transform: scale(1.03);
+}
+
+/* Archive cover thumbnail — bare cover, no card chrome (matches print magazine grid) */
+.cover-frame {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.group:hover .cover-frame {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  transform: translateY(-3px);
+}
+
+.dark .cover-frame {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Article card styling - editorial premium */
+.article-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--paper-elevated);
+  transition: box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s,
+              transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.article-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 12px 32px rgba(26, 95, 87, 0.12);
+  transform: translateY(-2px);
+}
+
+.dark .article-card:hover {
+  box-shadow: 0 12px 32px rgba(77, 179, 163, 0.18);
+}
+
+.article-card img {
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.article-card:hover img {
+  transform: scale(1.04);
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  border-radius: 8px;
+  background-color: var(--border-subtle);
+  background-image: linear-gradient(
+    90deg,
+    var(--border-subtle) 0%,
+    var(--border) 50%,
+    var(--border-subtle) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* Featured slider crossfade */
+@keyframes xfade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes xfade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+.xfade-in {
+  animation: xfade-in 0.6s ease both;
+}
+.xfade-out {
+  animation: xfade-out 0.6s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .xfade-in,
+  .xfade-out {
+    animation: none;
+  }
+}
+
+/* Radix Select content open/close */
+@keyframes selectContentShow {
+  from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes selectContentHide {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to { opacity: 0; transform: scale(0.95) translateY(-10px); }
+}
+
+/* Staggered entrance reveal (login, other single-card moments) */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up {
+    animation: none;
+  }
+}

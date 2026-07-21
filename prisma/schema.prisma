@@ -1,0 +1,69 @@
+// Bodhanam journal — data model. IDs mirror the original site's IDs so old links map cleanly.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+model Issue {
+  id         Int       @id @map("_id")
+  volume     Int?
+  issueNo    Int?
+  period     String
+  description String?
+  coverImage String?
+  published  Boolean   @default(true)
+  articles   Article[]
+  createdAt  DateTime  @default(now())
+}
+
+model Article {
+  id         Int      @id @map("_id")
+  title      String
+  author     String?
+  category   String?
+  excerpt    String?
+  bodyHtml   String
+  coverImage String?
+  order      Int      @default(0)
+  published  Boolean? // null = legacy (visible), false = draft, true = published
+  covernum   Int      @default(0) // >0 = cover story, ordered on home hero
+  slug       String? // kicker label shown on cover stories (e.g. "ഫത്്വ")
+  period     String?
+  issueId    Int
+  issue      Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([issueId])
+  @@index([category])
+}
+
+// Home-page section categories, managed in admin ("Columns" in the old CMS)
+model Column {
+  id    Int    @id @map("_id")
+  name  String @unique
+  order Int    @default(0)
+}
+
+model Page {
+  slug     String @id @map("_id")
+  title    String
+  bodyHtml String
+}
+
+model Setting {
+  key   String @id @map("_id")
+  value String
+}
+
+model User {
+  id           Int      @id @map("_id")
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         String   @default("admin") // "admin" | "editor"
+  createdAt    DateTime @default(now())
+}
