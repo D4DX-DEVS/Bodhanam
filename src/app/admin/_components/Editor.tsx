@@ -79,6 +79,7 @@ export default function Editor({ value, onChange }: EditorProps) {
       {/* Toolbar */}
       <div className="bg-paper dark:bg-[#1f1f1f] border-b border-default p-4 flex flex-wrap gap-2">
         <button
+          type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
           disabled={!editor.can().chain().focus().toggleBold().run()}
           className={`px-3 py-1 rounded border ${
@@ -91,6 +92,7 @@ export default function Editor({ value, onChange }: EditorProps) {
           <strong>B</strong>
         </button>
         <button
+          type="button"
           onClick={() => editor.chain().focus().toggleItalic().run()}
           disabled={!editor.can().chain().focus().toggleItalic().run()}
           className={`px-3 py-1 rounded border ${
@@ -106,6 +108,7 @@ export default function Editor({ value, onChange }: EditorProps) {
         <div className="border-l border-default mx-2" />
 
         <button
+          type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           className={`px-3 py-1 rounded border ${
             editor.isActive("heading", { level: 2 })
@@ -117,6 +120,7 @@ export default function Editor({ value, onChange }: EditorProps) {
           H2
         </button>
         <button
+          type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
           className={`px-3 py-1 rounded border ${
             editor.isActive("heading", { level: 3 })
@@ -131,6 +135,7 @@ export default function Editor({ value, onChange }: EditorProps) {
         <div className="border-l border-default mx-2" />
 
         <button
+          type="button"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={`px-3 py-1 rounded border ${
             editor.isActive("bulletList")
@@ -142,6 +147,7 @@ export default function Editor({ value, onChange }: EditorProps) {
           • List
         </button>
         <button
+          type="button"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           className={`px-3 py-1 rounded border ${
             editor.isActive("orderedList")
@@ -156,6 +162,7 @@ export default function Editor({ value, onChange }: EditorProps) {
         <div className="border-l border-default mx-2" />
 
         <button
+          type="button"
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           className={`px-3 py-1 rounded border ${
             editor.isActive("blockquote")
@@ -170,6 +177,7 @@ export default function Editor({ value, onChange }: EditorProps) {
         <div className="border-l border-default mx-2" />
 
         <button
+          type="button"
           onClick={handleImageUpload}
           disabled={isUploading}
           className="px-3 py-1 rounded border border-default hover:bg-white dark:hover:bg-[#2a2a2a]"
