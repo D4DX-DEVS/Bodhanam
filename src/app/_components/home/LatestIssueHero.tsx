@@ -4,6 +4,7 @@ import type { getLatestIssue } from "@/lib/data";
 import BotanicalDecoration from "@/app/_components/BotanicalDecoration";
 import { DEFAULT_IMAGE } from "@/app/_components/Media";
 import IslamicPattern from "@/app/_components/IslamicPattern";
+import { cleanExcerpt } from "@/lib/text";
 
 type Issue = NonNullable<Awaited<ReturnType<typeof getLatestIssue>>>;
 type Article = Issue["articles"][number];
@@ -19,7 +20,7 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
   ).size;
 
   return (
-    <section className="py-8 md:py-12">
+    <section className="py-5 md:py-6">
       <div
         className="relative overflow-hidden rounded-[20px] border px-5 py-6 sm:px-8 sm:py-8 lg:px-10"
         style={{ borderColor: "var(--hero-border)", backgroundColor: "var(--hero-bg)" }}
@@ -56,10 +57,12 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
             >
               Latest Issue
             </span>
-            <h1 className="font-serif-ml text-3xl font-bold leading-tight text-ink md:text-4xl">
-              Vol. {issue.volume} · Issue {issue.issueNo}
+            <h1 className="font-serif-ml text-2xl font-bold leading-tight text-ink md:text-3xl">
+              {issue.period}
             </h1>
-            <p className="mt-1.5 text-muted">{issue.period}</p>
+            <p className="mt-1.5 text-sm font-medium text-muted">
+              Vol. {issue.volume} · Issue {issue.issueNo}
+            </p>
             {issue.description && (
               <p className="mt-3 text-sm leading-relaxed text-muted lg:max-w-md">
                 {issue.description}
@@ -101,20 +104,27 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
           {/* Mugavurap (editorial) excerpt */}
           {mugavurapArticle && (
             <div
-              className="hidden max-w-xs shrink-0 rounded-xl border p-5 lg:block"
+              className="hidden max-w-sm shrink-0 rounded-xl border p-6 lg:block lg:max-w-md"
               style={{ borderColor: "var(--hero-border)", backgroundColor: "var(--paper-elevated)" }}
             >
-              <p className="font-serif-ml mb-2 text-lg font-bold leading-snug text-ink">
+              {mugavurapArticle.category && (
+                <p className="mb-1.5 font-serif-ml text-base font-bold uppercase tracking-wide text-primary">
+                  {mugavurapArticle.category}
+                </p>
+              )}
+              <p className="font-serif-ml text-lg font-bold leading-snug text-ink">
                 {mugavurapArticle.title}
               </p>
-              <p className="line-clamp-4 text-sm leading-relaxed text-muted">
-                {mugavurapArticle.excerpt}
-              </p>
+              {mugavurapArticle.excerpt && (
+                <p className="line-clamp-[10] mt-3 text-sm leading-relaxed text-muted">
+                  {cleanExcerpt(mugavurapArticle.excerpt)}
+                </p>
+              )}
               <Link
                 href={`/articles/show/${mugavurapArticle.id}`}
-                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-light"
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-light"
               >
-                About this Issue
+                Read More
                 <ArrowRight size={14} strokeWidth={2} />
               </Link>
             </div>

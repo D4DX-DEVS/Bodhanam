@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Serif_Malayalam, Noto_Sans_Malayalam } from "next/font/google";
+import { Noto_Serif_Malayalam, Noto_Sans_Malayalam, Poppins } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
@@ -14,6 +14,15 @@ const notoSerifMalayalam = Noto_Serif_Malayalam({
 const notoSansMalayalam = Noto_Sans_Malayalam({
   variable: "--font-sans-ml",
   subsets: ["malayalam"],
+  weight: ["400", "500", "600", "700"],
+});
+
+// English/Latin font — the Malayalam webfonts above only ship malayalam
+// glyphs, so every Latin character (titles, numbers, UI chrome) falls
+// through to this instead of a system font.
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
 
@@ -37,7 +46,7 @@ export default function RootLayout({
   return (
     <html
       lang="ml"
-      className={`${notoSerifMalayalam.variable} ${notoSansMalayalam.variable} h-full antialiased`}
+      className={`${notoSerifMalayalam.variable} ${notoSansMalayalam.variable} ${poppins.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-paper text-ink antialiased">

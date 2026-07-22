@@ -50,7 +50,7 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
     bodyHtml: article?.bodyHtml ?? "",
     coverImage: article?.coverImage ?? "",
     order: article?.order != null ? String(article.order) : "",
-    issueId: String(article?.issueId ?? ""),
+    issueId: String(article?.issueId ?? issues[0]?.id ?? ""),
   });
 
   const save = async (published: boolean) => {
@@ -85,10 +85,11 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
 
       if (article) {
         await updateArticleAction(article.id, payload);
+        router.push("/admin/articles");
       } else {
-        await createArticleAction(payload);
+        const created = await createArticleAction(payload);
+        router.push(`/articles/show/${created.id}`);
       }
-      router.push("/admin/articles");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
       setLoading(false);
@@ -244,22 +245,35 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
       </div>
 
       <div className="flex gap-4">
-        <button
-          type="button"
-          onClick={() => save(false)}
-          disabled={loading}
-          className="flex-1 px-6 py-2 border border-default rounded-lg font-medium text-ink hover:bg-paper disabled:opacity-50"
-        >
-          {loading ? "Saving..." : "Save as Draft"}
-        </button>
-        <button
-          type="button"
-          onClick={() => save(true)}
-          disabled={loading}
-          className="flex-1 px-6 py-2 btn-primary rounded-lg font-medium disabled:opacity-50"
-        >
-          {loading ? "Saving..." : "Publish"}
-        </button>
+        {article ? (
+          <>
+            <button
+              type="button"
+              onClick={() => save(false)}
+              disabled={loading}
+              className="flex-1 px-6 py-2 border border-default rounded-lg font-medium text-ink hover:bg-paper disabled:opacity-50"
+            >
+              {loading ? "Saving..." : "Save as Draft"}
+            </button>
+            <button
+              type="button"
+              onClick={() => save(true)}
+              disabled={loading}
+              className="flex-1 px-6 py-2 btn-primary rounded-lg font-medium disabled:opacity-50"
+            >
+              {loading ? "Saving..." : "Publish"}
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={() => save(false)}
+            disabled={loading}
+            className="flex-1 px-6 py-2 btn-primary rounded-lg font-medium disabled:opacity-50"
+          >
+            {loading ? "Saving..." : "Save & Preview"}
+          </button>
+        )}
         {article && (
           <button
             type="button"

@@ -192,6 +192,22 @@ export async function updateArticleAction(
   return article;
 }
 
+export async function setArticlePublishedAction(id: number, published: boolean) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
+
+  const article = await db.article.update({
+    where: { id },
+    data: { published },
+  });
+
+  revalidatePath("/admin/articles");
+  revalidatePath(`/issue/${article.issueId}`);
+  revalidatePath(`/articles/show/${id}`);
+  revalidatePath("/");
+  return article;
+}
+
 export async function deleteArticleAction(id: number) {
   const session = await getSession();
   if (!session) throw new Error("Unauthorized");

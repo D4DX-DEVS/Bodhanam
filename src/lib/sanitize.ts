@@ -40,7 +40,7 @@ const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
 };
 
 export function sanitizeArticleHtml(html: string): string {
-  return sanitizeHtml(html, {
+  const clean = sanitizeHtml(html, {
     allowedTags: ALLOWED_TAGS as string[],
     allowedAttributes: ALLOWED_ATTRIBUTES,
     allowedSchemes: ["http", "https", "mailto"],
@@ -73,6 +73,14 @@ export function sanitizeArticleHtml(html: string): string {
     },
     disallowedTagsMode: "discard",
   });
+
+  // Legacy CMS bodies are full of "spacer" paragraphs (<p>&nbsp;</p>,
+  // <p><br></p>, nested empty spans) that render as big blank gaps between
+  // real paragraphs — collapse them.
+  return clean.replace(
+    /<p[^>]*>(?:\s|&nbsp;|<br\s*\/?>|<\/?(?:span|b|i|em|strong|u)[^>]*>)*<\/p>/gi,
+    ""
+  );
 }
 
 /** Strip an <img> from bodyHtml if its src matches the article's separately-rendered cover image (avoids showing it twice). */

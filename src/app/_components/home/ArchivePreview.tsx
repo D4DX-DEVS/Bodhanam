@@ -9,10 +9,15 @@ export default function ArchivePreview({ issues }: { issues: Issue[] }) {
   if (issues.length === 0) return null;
 
   return (
-    <section className="border-t py-10 md:py-14" style={{ borderColor: "var(--border)" }}>
-      <div className="mb-8 flex items-center justify-between gap-4">
+    <section
+      className="mt-5 mx-[calc(50%-50vw)] py-6 md:mt-6 md:py-10"
+      style={{ backgroundColor: "var(--section-tint)" }}
+    >
+      {/* Full-bleed band; re-align content to the page container */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mb-4 flex items-center justify-between gap-4">
         <h2 className="font-serif-ml text-2xl font-bold text-ink md:text-3xl">
-          From the Archive
+          Archives
         </h2>
         <Link
           href="/archives"
@@ -45,6 +50,7 @@ export default function ArchivePreview({ issues }: { issues: Issue[] }) {
             </div>
           </Link>
         ))}
+      </div>
       </div>
     </section>
   );

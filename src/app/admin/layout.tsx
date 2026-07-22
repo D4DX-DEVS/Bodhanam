@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { logoutAction } from "@/app/admin/actions";
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -108,6 +109,9 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const mounted = useMounted();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const [adminName] = useState("Admin");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -115,6 +119,9 @@ export default function AdminLayout({
   const handleLogout = async () => {
     setLoggingOut(true);
     await logoutAction();
+    // layout stays mounted across /admin/login navigation, so reset modal state
+    setShowLogoutConfirm(false);
+    setLoggingOut(false);
     router.push("/admin/login");
     router.refresh();
   };
@@ -136,10 +143,15 @@ export default function AdminLayout({
       {/* Sidebar */}
       <aside className="w-64 shrink-0 overflow-y-auto border-r border-default bg-white dark:bg-[#1f1f1f]">
         <div className="h-16 flex flex-col justify-center px-6 border-b border-default">
-          <div className="font-serif-ml text-xl font-bold text-primary leading-tight">
-            ബോധനം
-          </div>
-          <div className="text-xs text-muted leading-tight">Admin</div>
+          <Image
+            src={mounted && isDark ? "/images/logo-light.png" : "/images/logo1.png"}
+            alt="Bodhanam"
+            height={32}
+            width={130}
+            priority
+            className="h-7 w-auto"
+          />
+          <div className="text-xs text-muted leading-tight mt-1">Admin</div>
         </div>
 
         <nav className="p-6 space-y-2">

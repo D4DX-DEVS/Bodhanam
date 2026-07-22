@@ -5,9 +5,7 @@ import BotanicalDecoration from "./BotanicalDecoration";
 
 const EXPLORE_LINKS = [
   { label: "Archives", href: "/archives" },
-  { label: "Topics", href: "/topics" },
   { label: "Authors", href: "/authors" },
-  { label: "All Articles", href: "/archives" },
 ];
 
 const INFO_LINKS = [
@@ -64,7 +62,7 @@ export default async function Footer() {
 
   return (
     <footer
-      className="relative mt-12 overflow-hidden md:mt-16"
+      className="relative overflow-hidden"
       style={{ backgroundColor: "var(--footer-bg)", color: "var(--footer-ink)" }}
     >
       <BotanicalDecoration
@@ -72,7 +70,7 @@ export default async function Footer() {
         className="hidden md:block absolute -right-10 -bottom-12 h-52 w-52 opacity-30"
       />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-10 mb-8 md:mb-10">
           <div>
             <h3 className="font-serif-ml text-2xl md:text-3xl font-bold mb-3">ബോധനം</h3>

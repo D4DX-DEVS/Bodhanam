@@ -52,7 +52,7 @@ export default function ArticleSidebar({ issue, recent }: ArticleSidebarProps) {
               <li key={a.id}>
                 <Link
                   href={`/articles/show/${a.id}`}
-                  className="group flex gap-3 rounded-xl p-2 transition-colors duration-200 hover:bg-[var(--paper-elevated)]"
+                  className="recent-post-link group flex gap-3 rounded-xl border border-transparent p-2 transition-colors duration-200 hover:border-[var(--primary)] hover:bg-[var(--paper-elevated)]"
                 >
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg">
                     <img
@@ -66,7 +66,9 @@ export default function ArticleSidebar({ issue, recent }: ArticleSidebarProps) {
                       {a.title}
                     </h3>
                     {a.author && (
-                      <p className="mt-1 text-xs text-muted">{a.author}</p>
+                      <p className="mt-1 text-xs text-muted transition-colors duration-200 group-hover:text-primary">
+                        {a.author}
+                      </p>
                     )}
                   </div>
                 </Link>

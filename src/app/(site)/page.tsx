@@ -7,7 +7,13 @@ import {
 import LatestIssueHero from "@/app/_components/home/LatestIssueHero";
 import FeaturedStories from "@/app/_components/home/FeaturedStories";
 import ColumnsSection from "@/app/_components/home/ColumnsSection";
+import LatestArticles from "@/app/_components/home/LatestArticles";
 import ArchivePreview from "@/app/_components/home/ArchivePreview";
+
+// Keep latest-issue content fresh — no static caching. (Cover-story shuffle
+// happens client-side in FeaturedStories, so it reshuffles on every visit
+// regardless of router/prefetch caches.)
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Home",
@@ -32,6 +38,7 @@ export default async function Home() {
     article: Article;
   }> = [];
   let mugavurapArticle: Article | undefined;
+  let remainingArticles: Article[] = [];
 
   if (latestIssue) {
     const mugavurapTarget = normalizeCategoryName("മുഖക്കുറിപ്പ്");
@@ -39,18 +46,10 @@ export default async function Home() {
       (a) => a.category && normalizeCategoryName(a.category) === mugavurapTarget
     );
 
-    // Original CMS convention: covernum 1-4 = cover stories on the home hero;
-    // covernum 5+ only orders the remaining articles in the main grid.
-    // Cover stories lead, then top up with the rest so the carousel has
-    // enough cards to fill the 1-feature + 4-side window and still rotate.
-    const covers = latestIssue.articles
-      .filter((a) => a.covernum > 0 && a.covernum <= 4)
-      .sort((a, b) => a.covernum - b.covernum);
-    const coverIds = new Set(covers.map((a) => a.id));
-    const rest = latestIssue.articles
-      .filter((a) => !coverIds.has(a.id))
-      .sort((a, b) => (a.covernum || 99) - (b.covernum || 99));
-    coverStories = [...covers, ...rest];
+    // Original CMS convention: covernum 1-4 = this issue's actual cover stories.
+    // Order shuffled client-side in FeaturedStories.
+    const covers = latestIssue.articles.filter((a) => a.covernum > 0 && a.covernum <= 4);
+    coverStories = covers;
 
     for (const column of columns) {
       const target = normalizeCategoryName(column.name);
@@ -59,6 +58,14 @@ export default async function Home() {
       );
       if (article) columnSections.push({ column, article });
     }
+
+    // ലേഖനങ്ങൾ: this issue's remaining articles — same convention as the
+    // reference site, not a sitewide "recent articles" feed.
+    const usedIds = new Set([
+      ...covers.map((a) => a.id),
+      ...columnSections.map((s) => s.article.id),
+    ]);
+    remainingArticles = latestIssue.articles.filter((a) => !usedIds.has(a.id));
   }
 
   return (
@@ -72,7 +79,11 @@ export default async function Home() {
       )}
 
       {latestIssue && (
-        <ColumnsSection sections={columnSections} issueId={latestIssue.id} />
+        <ColumnsSection sections={columnSections} />
+      )}
+
+      {latestIssue && (
+        <LatestArticles articles={remainingArticles} issueId={latestIssue.id} />
       )}
 
       <ArchivePreview issues={recentIssues} />

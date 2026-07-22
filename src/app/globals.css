@@ -26,10 +26,11 @@
   /* Light theme - Premium editorial palette */
   --paper: #faf9f7;
   --paper-elevated: #ffffff;
+  --section-tint: #eceae5; /* creamy grey band for home sections */
   --ink: #0d0c0a;
-  --primary: #1a5f57;
-  --primary-light: #2a7f6f;
-  --primary-strong: #134b44;
+  --primary: #b31616; /* logo red */
+  --primary-light: #d43a3a;
+  --primary-strong: #8f1111;
   --secondary: #8b7355;
   --accent-warm: #d4a574;
   --border: #e5ddd3;
@@ -46,12 +47,12 @@
   --hero-bg: #fcf9f2;
   --hero-border: #ece3d3;
   /* Footer is always a dark forest surface, independent of site theme */
-  --footer-bg: #0b211d;
-  --footer-bg-elevated: #123330;
+  --footer-bg: #1f1f1f; /* grey footer */
+  --footer-bg-elevated: #2a2a2a;
   --footer-ink: #f3f1ec;
-  --footer-muted: #9fb0aa;
+  --footer-muted: #a8a8a8;
   --footer-border: rgba(243, 241, 236, 0.12);
-  --footer-accent: #5fc9b8;
+  --footer-accent: #e05c5c;
   --leaf: #8ba394;
   color-scheme: light;
 }
@@ -61,10 +62,11 @@
   /* Premium dark palette */
   --paper: #0f0e0c;
   --paper-elevated: #1a1815;
+  --section-tint: #171512;
   --ink: #f5f2ed;
-  --primary: #4db3a3;
-  --primary-light: #5fc9b8;
-  --primary-strong: #3fa392;
+  --primary: #e05c5c; /* logo red, lifted for dark bg */
+  --primary-light: #ef8080;
+  --primary-strong: #c94444;
   --secondary: #c9a87a;
   --accent-warm: #d4a574;
   --border: #2d2a25;
@@ -83,8 +85,12 @@ html {
 
 body {
   background: var(--paper);
+  /* 100vw full-bleed bands include scrollbar width — clip the sliver */
+  overflow-x: clip;
   color: var(--ink);
-  font-family: var(--font-sans-ml), "Noto Sans Malayalam", system-ui, sans-serif;
+  /* Poppins first: English/Latin renders in Poppins; Malayalam glyphs fall
+     through to Noto Sans Malayalam (Poppins has none). */
+  font-family: var(--font-poppins), var(--font-sans-ml), "Noto Sans Malayalam", sans-serif;
   line-height: 1.6;
   transition: background-color 0.3s, color 0.3s;
 }
@@ -105,7 +111,7 @@ body {
 /* Malayalam text reading support */
 .prose-ml {
   max-width: 65ch;
-  font-family: var(--font-serif-ml);
+  font-family: var(--font-poppins), var(--font-serif-ml), serif;
   font-size: 1.0625rem;
   line-height: 1.9;
   text-align: justify;
@@ -130,6 +136,11 @@ body {
 
 .prose-ml p {
   margin-bottom: 1rem;
+}
+
+/* Legacy spacer paragraphs that survive sanitization render as blank gaps */
+.prose-ml p:empty {
+  display: none;
 }
 
 .prose-ml img {
@@ -166,16 +177,14 @@ body {
 
 .content-card {
   padding: 2rem;
-  border: 1px solid var(--border);
   border-radius: 0.75rem;
-  background-color: var(--paper);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  background-color: var(--paper-elevated);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
 }
 
 .content-card:hover {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-  border-color: var(--primary);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 640px) {
@@ -185,6 +194,10 @@ body {
 }
 
 /* Utility classes */
+.text-brand-red {
+  color: #b31616; /* logo red — author names etc. */
+}
+
 .text-paper {
   color: var(--paper);
 }
@@ -219,11 +232,11 @@ body {
 
 /* Editorial refined typography */
 .font-serif-ml {
-  font-family: var(--font-serif-ml), "Noto Serif Malayalam", Georgia, serif;
+  font-family: var(--font-poppins), var(--font-serif-ml), "Noto Serif Malayalam", serif;
 }
 
 .font-sans-ml {
-  font-family: var(--font-sans-ml), "Noto Sans Malayalam", system-ui, sans-serif;
+  font-family: var(--font-poppins), var(--font-sans-ml), "Noto Sans Malayalam", sans-serif;
 }
 
 /* Link styling */
@@ -364,10 +377,11 @@ h3 {
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid var(--border);
+  border: 1px solid transparent; /* reserves space so hover border doesn't shift layout */
   border-radius: 14px;
   overflow: hidden;
   background: var(--paper-elevated);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1),
               border-color 0.2s,
               transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
@@ -375,12 +389,54 @@ h3 {
 
 .article-card:hover {
   border-color: var(--primary);
-  box-shadow: 0 12px 32px rgba(26, 95, 87, 0.12);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
+/* Card hover: title turns brand red; add .card-hover-all for all text */
+.article-card h3,
+.article-card p {
+  transition: color 0.2s;
+}
+
+.article-card:hover h3 {
+  color: var(--primary);
+}
+
+.card-hover-all:hover h3,
+.card-hover-all:hover p {
+  color: var(--primary);
+}
+
+/* Featured section: small right-side cards — title reds on hover */
+.featured-mini h3 {
+  transition: color 0.2s;
+}
+
+.featured-mini:hover h3 {
+  color: var(--primary);
+}
+
+/* Cover-story rotation fade */
+@keyframes fade-swap {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-swap {
+  animation: fade-swap 1s ease-in-out;
+}
+
+/* Sidebar recent-post rows: same red text on hover. Needed here because the
+   unlayered .text-ink/.text-muted utilities outrank Tailwind's layered
+   group-hover classes. */
+.recent-post-link:hover h3,
+.recent-post-link:hover p {
+  color: var(--primary);
+}
+
 .dark .article-card:hover {
-  box-shadow: 0 12px 32px rgba(77, 179, 163, 0.18);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
 }
 
 .article-card img {
@@ -415,28 +471,6 @@ h3 {
 
 @media (prefers-reduced-motion: reduce) {
   .skeleton {
-    animation: none;
-  }
-}
-
-/* Featured slider crossfade */
-@keyframes xfade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes xfade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-.xfade-in {
-  animation: xfade-in 0.6s ease both;
-}
-.xfade-out {
-  animation: xfade-out 0.6s ease both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .xfade-in,
-  .xfade-out {
     animation: none;
   }
 }

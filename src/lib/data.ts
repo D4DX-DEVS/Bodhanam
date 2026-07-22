@@ -244,23 +244,28 @@ export async function searchIssuesPaged(
 export async function searchArticlesPaged(
   query: string,
   page: number = 1,
-  perPage: number = 12
+  perPage: number = 12,
+  category?: string
 ) {
   const q = query.trim();
   const skip = (page - 1) * perPage;
   const where = {
     issue: { published: true },
     ...VISIBLE_ARTICLE,
+    ...(category ? { category } : {}),
     OR: [
       { title: { contains: q, mode: "insensitive" as const } },
       { author: { contains: q, mode: "insensitive" as const } },
       { excerpt: { contains: q, mode: "insensitive" as const } },
+      // Deep search: full article body (HTML) too
+      { bodyHtml: { contains: q, mode: "insensitive" as const } },
     ],
   };
   const total = await db.article.count({ where });
   const items = await db.article.findMany({
     where,
     include: { issue: true },
+    omit: { bodyHtml: true },
     orderBy: { id: "desc" },
     skip,
     take: perPage,
@@ -275,6 +280,17 @@ export async function searchArticlesPaged(
     perPage,
     totalPages,
   };
+}
+
+/** Distinct categories across published articles, for the search filter. */
+export async function getSearchCategories(): Promise<string[]> {
+  const rows = await db.article.findMany({
+    where: { issue: { published: true }, ...VISIBLE_ARTICLE, category: { not: null } },
+    select: { category: true },
+    distinct: ["category"],
+    orderBy: { category: "asc" },
+  });
+  return rows.map((r) => r.category).filter((c): c is string => Boolean(c));
 }
 
 // ============ AUTHOR QUERIES ============

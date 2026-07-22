@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import {
   Eye,
   EyeOff,
@@ -11,11 +12,23 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
+import Image from "next/image";
 import { loginAction } from "@/app/admin/actions";
 import BotanicalDecoration from "@/app/_components/BotanicalDecoration";
 
+function useMounted(): boolean {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
+  const mounted = useMounted();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +51,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex-1 flex items-center justify-center px-4 py-12 overflow-hidden">
+    <div
+      className="relative flex-1 flex items-center justify-center px-4 py-12 overflow-hidden"
+      style={{
+        // ponytail: red admin-login theme scoped via CSS var override, doesn't touch the public site's teal theme
+        "--primary": "#dc2626",
+        "--primary-light": "#ef4444",
+        "--primary-strong": "#b91c1c",
+      } as React.CSSProperties}
+    >
       {/* Faint editorial grain */}
       <div
         aria-hidden="true"
@@ -61,9 +82,14 @@ export default function LoginPage() {
           <div className="text-[11px] tracking-[0.3em] uppercase text-muted mb-3">
             Editorial Access
           </div>
-          <div className="font-serif-ml text-5xl font-bold text-primary leading-none">
-            ബോധനം
-          </div>
+          <Image
+            src={mounted && isDark ? "/images/logo-light.png" : "/images/logo1.png"}
+            alt="Bodhanam"
+            height={56}
+            width={227}
+            priority
+            className="h-14 w-auto mx-auto"
+          />
           <div className="mt-4 flex items-center justify-center gap-3">
             <span
               className="h-px w-8"
