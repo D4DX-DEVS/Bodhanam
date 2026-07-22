@@ -51,7 +51,20 @@ export default function EditAboutPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold text-ink mb-8">Edit About Page</h1>
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-ink">About Page</h1>
+          <p className="text-muted mt-1">Edit your website about page content.</p>
+        </div>
+        <button
+          type="submit"
+          form="about-form"
+          disabled={saving}
+          className="px-5 py-2.5 btn-primary rounded-xl font-medium text-sm disabled:opacity-50"
+        >
+          {saving ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
 
       {error && (
         <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-700 dark:text-red-300 mb-6">
@@ -59,7 +72,7 @@ export default function EditAboutPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form id="about-form" onSubmit={handleSubmit} className="space-y-6 p-6 bg-white dark:bg-[#242424] border border-default rounded-2xl">
         <div>
           <label className="block text-sm font-medium text-ink mb-2">
             Title
@@ -82,13 +95,6 @@ export default function EditAboutPage() {
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full px-6 py-2 btn-primary rounded-lg font-medium disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save Page"}
-        </button>
       </form>
     </div>
   );

@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
+import { Plus, Search, Pencil, Eye } from "lucide-react";
 import Pagination from "@/app/_components/Pagination";
+import StatusBadge from "@/app/admin/_components/StatusBadge";
 import IssueFilterSelect from "./IssueFilterSelect";
 
 export const metadata = {
@@ -49,31 +51,45 @@ export default async function ArticlesPage({
   }
 
   const totalPages = Math.ceil(total / pageSize);
+  const from = total === 0 ? 0 : (pageNum - 1) * pageSize + 1;
+  const to = Math.min(pageNum * pageSize, total);
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold text-ink">Articles</h1>
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-ink">Articles</h1>
+          <p className="text-muted mt-1">Browse and manage all articles.</p>
+        </div>
         <Link
           href="/admin/articles/new"
-          className="px-6 py-2 btn-primary rounded-lg font-medium"
+          className="inline-flex items-center gap-2 px-5 py-2.5 btn-primary rounded-xl font-medium text-sm"
         >
-          New Article
+          <Plus size={16} /> New Article
         </Link>
       </div>
 
       {/* Filter */}
       <div className="mb-6">
-        <form action="/admin/articles" method="get" className="flex flex-wrap gap-4 items-center">
-          <input
-            type="text"
-            name="q"
-            defaultValue={query}
-            placeholder="Search by title…"
-            className="px-4 py-2 border border-default rounded-lg text-ink bg-paper"
-          />
+        <form action="/admin/articles" method="get" className="flex flex-wrap gap-3 items-center">
+          <div className="relative">
+            <Search
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+            />
+            <input
+              type="text"
+              name="q"
+              defaultValue={query}
+              placeholder="Search by title…"
+              className="pl-10 pr-4 py-2.5 w-72 border border-default rounded-xl text-sm text-ink bg-white dark:bg-[#242424] focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+            />
+          </div>
           <IssueFilterSelect issues={issues} initial={issueFilter || "all"} />
-          <button type="submit" className="px-4 py-2 btn-primary rounded-lg font-medium">
+          <button
+            type="submit"
+            className="px-5 py-2.5 border border-default rounded-xl font-medium text-sm text-ink hover:border-primary hover:text-primary transition-colors bg-white dark:bg-[#242424]"
+          >
             Filter
           </button>
         </form>
@@ -83,23 +99,23 @@ export default async function ArticlesPage({
         <p className="text-muted">No articles yet.</p>
       ) : (
         <>
-          <div className="bg-white dark:bg-[#2a2a2a] border border-default rounded-lg overflow-hidden">
+          <div className="bg-white dark:bg-[#242424] border border-default rounded-2xl overflow-hidden">
             <table className="w-full">
               <thead className="border-b border-default bg-paper dark:bg-[#1f1f1f]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-ink">
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
                     Title
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-ink">
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
                     Issue
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-ink">
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
                     Category
                   </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-ink">
+                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-right text-sm font-medium text-ink">
+                  <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">
                     Actions
                   </th>
                 </tr>
@@ -110,8 +126,13 @@ export default async function ArticlesPage({
                     key={article.id}
                     className="border-t border-default hover:bg-paper dark:hover:bg-[#1f1f1f] transition-colors"
                   >
-                    <td className="px-6 py-4 text-sm line-clamp-1">
-                      {article.title}
+                    <td className="px-6 py-4 text-sm max-w-md">
+                      <Link
+                        href={`/admin/articles/${article.id}/edit`}
+                        className="text-ink hover:text-primary line-clamp-1"
+                      >
+                        {article.title}
+                      </Link>
                     </td>
                     <td className="px-6 py-4 text-sm text-muted">
                       {article.issue?.volume}/{article.issue?.issueNo}
@@ -119,25 +140,35 @@ export default async function ArticlesPage({
                     <td className="px-6 py-4 text-sm text-muted">
                       {article.category || "—"}
                     </td>
-                    <td className="px-6 py-4 text-sm">
-                      {article.published === false ? (
-                        <span className="text-amber-600 dark:text-amber-400 font-medium">Draft</span>
-                      ) : (
-                        <span className="text-green-600 dark:text-green-400 font-medium">Published</span>
-                      )}
+                    <td className="px-6 py-4">
+                      <StatusBadge published={article.published} />
                     </td>
-                    <td className="px-6 py-4 text-sm text-right">
-                      <Link
-                        href={`/admin/articles/${article.id}/edit`}
-                        className="text-primary hover:text-primary-light"
-                      >
-                        Edit
-                      </Link>
+                    <td className="px-6 py-4 text-right">
+                      <div className="inline-flex items-center gap-1">
+                        <Link
+                          href={`/admin/articles/${article.id}/edit`}
+                          title="Edit"
+                          className="p-2 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors"
+                        >
+                          <Pencil size={16} />
+                        </Link>
+                        <Link
+                          href={`/articles/show/${article.id}`}
+                          target="_blank"
+                          title="View"
+                          className="p-2 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors"
+                        >
+                          <Eye size={16} />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            <div className="px-6 py-3 border-t border-default text-sm text-muted">
+              Showing {from} to {to} of {total} articles
+            </div>
           </div>
 
           <Pagination

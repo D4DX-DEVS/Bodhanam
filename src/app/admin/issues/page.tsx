@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
-import { deleteIssueAction } from "@/app/admin/actions";
+import { Plus, Search, Pencil, Eye } from "lucide-react";
 import Pagination from "@/app/_components/Pagination";
+import StatusBadge from "@/app/admin/_components/StatusBadge";
 
 export const metadata = {
   title: "Issues · Admin",
@@ -33,29 +34,43 @@ export default async function IssuesPage({
   ]);
 
   const totalPages = Math.ceil(total / pageSize);
+  const from = total === 0 ? 0 : (pageNum - 1) * pageSize + 1;
+  const to = Math.min(pageNum * pageSize, total);
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold text-ink">Issues</h1>
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-ink">Issues</h1>
+          <p className="text-muted mt-1">Manage and organize your issues by period.</p>
+        </div>
         <Link
           href="/admin/issues/new"
-          className="px-6 py-2 btn-primary rounded-lg font-medium"
+          className="inline-flex items-center gap-2 px-5 py-2.5 btn-primary rounded-xl font-medium text-sm"
         >
-          New Issue
+          <Plus size={16} /> New Issue
         </Link>
       </div>
 
       <div className="mb-6">
-        <form action="/admin/issues" method="get" className="flex gap-4 items-center">
-          <input
-            type="text"
-            name="q"
-            defaultValue={query}
-            placeholder="Search by period…"
-            className="px-4 py-2 border border-default rounded-lg text-ink bg-paper"
-          />
-          <button type="submit" className="px-4 py-2 btn-primary rounded-lg font-medium">
+        <form action="/admin/issues" method="get" className="flex gap-3 items-center">
+          <div className="relative">
+            <Search
+              size={16}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+            />
+            <input
+              type="text"
+              name="q"
+              defaultValue={query}
+              placeholder="Search by period…"
+              className="pl-10 pr-4 py-2.5 w-72 border border-default rounded-xl text-sm text-ink bg-white dark:bg-[#242424] focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+            />
+          </div>
+          <button
+            type="submit"
+            className="px-5 py-2.5 border border-default rounded-xl font-medium text-sm text-ink hover:border-primary hover:text-primary transition-colors bg-white dark:bg-[#242424]"
+          >
             Filter
           </button>
         </form>
@@ -64,23 +79,23 @@ export default async function IssuesPage({
       {issues.length === 0 ? (
         <p className="text-muted">{query ? "No issues match this search." : "No issues yet."}</p>
       ) : (
-        <div className="bg-white dark:bg-[#2a2a2a] border border-default rounded-lg overflow-hidden">
+        <div className="bg-white dark:bg-[#242424] border border-default rounded-2xl overflow-hidden">
           <table className="w-full">
             <thead className="border-b border-default bg-paper dark:bg-[#1f1f1f]">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-medium text-ink">
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
                   Volume / Issue
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-ink">
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
                   Period
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-ink">
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
                   Articles
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-medium text-ink">
+                <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted">
                   Status
                 </th>
-                <th className="px-6 py-3 text-right text-sm font-medium text-ink">
+                <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-muted">
                   Actions
                 </th>
               </tr>
@@ -91,32 +106,42 @@ export default async function IssuesPage({
                   key={issue.id}
                   className="border-t border-default hover:bg-paper dark:hover:bg-[#1f1f1f] transition-colors"
                 >
-                  <td className="px-6 py-4 text-sm">
+                  <td className="px-6 py-4 text-sm font-medium text-ink">
                     {issue.volume}/{issue.issueNo}
                   </td>
                   <td className="px-6 py-4 text-sm text-muted">{issue.period}</td>
                   <td className="px-6 py-4 text-sm text-muted">
                     {issue._count.articles}
                   </td>
-                  <td className="px-6 py-4 text-sm">
-                    {issue.published ? (
-                      <span className="text-green-600 dark:text-green-400 font-medium">Published</span>
-                    ) : (
-                      <span className="text-amber-600 dark:text-amber-400 font-medium">Draft</span>
-                    )}
+                  <td className="px-6 py-4">
+                    <StatusBadge published={issue.published} />
                   </td>
-                  <td className="px-6 py-4 text-sm text-right space-x-4">
-                    <Link
-                      href={`/admin/issues/${issue.id}/edit`}
-                      className="text-primary hover:text-primary-light"
-                    >
-                      Edit
-                    </Link>
+                  <td className="px-6 py-4 text-right">
+                    <div className="inline-flex items-center gap-1">
+                      <Link
+                        href={`/admin/issues/${issue.id}/edit`}
+                        title="Edit"
+                        className="p-2 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors"
+                      >
+                        <Pencil size={16} />
+                      </Link>
+                      <Link
+                        href={`/issue/${issue.id}`}
+                        target="_blank"
+                        title="View"
+                        className="p-2 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors"
+                      >
+                        <Eye size={16} />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          <div className="px-6 py-3 border-t border-default text-sm text-muted">
+            Showing {from} to {to} of {total} issues
+          </div>
         </div>
       )}
 
