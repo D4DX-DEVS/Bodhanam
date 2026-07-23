@@ -80,6 +80,8 @@ export default function ArticleForm({
   const [issueId, setIssueId] = useState(
     String(article?.issueId ?? defaultIssueId ?? issues[0]?.id ?? "")
   );
+  // ponytail: null/true both = visible; only false hides. New articles default visible.
+  const [published, setPublished] = useState(article ? article.published !== false : true);
 
   const save = async () => {
     setLoading(true);
@@ -109,9 +111,7 @@ export default function ArticleForm({
         covernum: parseInt(String(formData.covernum)) || 0,
         slug: formData.slug.trim() || null,
         period: null,
-        // Publish is issue-level only: saving never changes the article's
-        // published flag (existing value kept; new articles start null).
-        published: article ? article.published : null,
+        published,
         issueId: issueIdNum,
       };
 
@@ -277,6 +277,25 @@ export default function ArticleForm({
 
       <div>
         <label className="block text-sm font-medium text-ink mb-2">
+          Status
+        </label>
+        <Select
+          value={published ? "published" : "draft"}
+          onValueChange={(v) => setPublished(v === "published")}
+          ariaLabel="Article status"
+          className="w-full"
+          options={[
+            { value: "published", label: "Published" },
+            { value: "draft", label: "Draft — hidden from the site" },
+          ]}
+        />
+        <p className="mt-1 text-xs text-muted">
+          Draft hides this article everywhere, even after the issue is published.
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-ink mb-2">
           Excerpt
         </label>
         <textarea
@@ -310,7 +329,8 @@ export default function ArticleForm({
         />
       </div>
 
-      <div className="flex gap-4">
+      {/* Sticky so Save/Preview stay reachable without scrolling the long form */}
+      <div className="sticky bottom-0 z-10 flex gap-3 border-t border-default bg-paper/95 py-4 backdrop-blur">
         <button
           type="button"
           onClick={save}
@@ -319,6 +339,16 @@ export default function ArticleForm({
         >
           {loading ? "Saving..." : "Save"}
         </button>
+        {article && (
+          <a
+            href={`/articles/show/${article.id}`}
+            target="_blank"
+            rel="noopener"
+            className="px-6 py-2 border border-default rounded-lg font-medium text-ink hover:border-primary hover:text-primary transition-colors"
+          >
+            Preview
+          </a>
+        )}
         {article && (
           <button
             type="button"
