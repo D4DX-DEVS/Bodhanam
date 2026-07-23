@@ -1,4 +1,26 @@
 import { db } from "./db";
+import { htmlToExcerpt } from "./text";
+
+/**
+ * Fill missing excerpts from article bodies (one query for the missing ids)
+ * so home cards always show a short description.
+ */
+export async function withDerivedExcerpts<
+  T extends { id: number; excerpt: string | null }
+>(articles: T[]): Promise<T[]> {
+  const missing = articles.filter((a) => !a.excerpt?.trim()).map((a) => a.id);
+  if (missing.length === 0) return articles;
+  const bodies = await db.article.findMany({
+    where: { id: { in: missing } },
+    select: { id: true, bodyHtml: true },
+  });
+  const derived = new Map(
+    bodies.map((b) => [b.id, htmlToExcerpt(b.bodyHtml)])
+  );
+  return articles.map((a) =>
+    a.excerpt?.trim() ? a : { ...a, excerpt: derived.get(a.id) || null }
+  );
+}
 
 /**
  * Normalize category names for matching

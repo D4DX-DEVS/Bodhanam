@@ -63,11 +63,6 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
             <p className="mt-1.5 text-sm font-medium text-muted">
               Vol. {issue.volume} · Issue {issue.issueNo}
             </p>
-            {issue.description && (
-              <p className="mt-3 text-sm leading-relaxed text-muted lg:max-w-md">
-                {issue.description}
-              </p>
-            )}
 
             <div className="mt-5 flex justify-center gap-6 lg:justify-start">
               <div className="flex items-center gap-2">
@@ -116,7 +111,7 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
                 {mugavurapArticle.title}
               </p>
               {mugavurapArticle.excerpt && (
-                <p className="line-clamp-[10] mt-3 text-sm leading-relaxed text-muted">
+                <p className="line-clamp-3 mt-3 text-sm leading-relaxed text-muted">
                   {cleanExcerpt(mugavurapArticle.excerpt)}
                 </p>
               )}

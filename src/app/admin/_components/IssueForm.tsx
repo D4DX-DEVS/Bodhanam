@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import {
   createIssueAction,
   updateIssueAction,
+  deleteIssueAction,
 } from "@/app/admin/actions";
 import ImageUpload from "./ImageUpload";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface IssueFormProps {
   issue?: {
@@ -24,11 +26,11 @@ export default function IssueForm({ issue }: IssueFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [formData, setFormData] = useState({
     volume: issue?.volume ?? "",
     issueNo: issue?.issueNo ?? "",
     period: issue?.period ?? "",
-    description: issue?.description ?? "",
     coverImage: issue?.coverImage ?? "",
   });
 
@@ -46,7 +48,8 @@ export default function IssueForm({ issue }: IssueFormProps) {
         volume: formData.volume ? parseInt(String(formData.volume)) : null,
         issueNo: formData.issueNo ? parseInt(String(formData.issueNo)) : null,
         period: formData.period,
-        description: formData.description.trim() || null,
+        // Hero blurb now comes from the മുഖക്കുറിപ്പ് article; keep any legacy value.
+        description: issue?.description ?? null,
         coverImage: formData.coverImage || null,
         published,
       };
@@ -58,6 +61,19 @@ export default function IssueForm({ issue }: IssueFormProps) {
       router.push("/admin/issues");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!issue) return;
+    setConfirmDelete(false);
+    setLoading(true);
+    try {
+      await deleteIssueAction(issue.id);
+      router.push("/admin/issues");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete");
       setLoading(false);
     }
   };
@@ -136,21 +152,6 @@ export default function IssueForm({ issue }: IssueFormProps) {
 
       <div>
         <label className="block text-sm font-medium text-ink mb-2">
-          Description
-        </label>
-        <textarea
-          value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          rows={3}
-          placeholder="Short blurb shown under the issue title on the home page"
-          className="w-full px-4 py-2 border border-default rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-ink bg-paper"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-ink mb-2">
           Cover Image
         </label>
         <ImageUpload
@@ -176,7 +177,35 @@ export default function IssueForm({ issue }: IssueFormProps) {
         >
           {loading ? "Saving..." : "Publish"}
         </button>
+        {issue && (
+          <button
+            type="button"
+            onClick={() => setConfirmDelete(true)}
+            disabled={loading}
+            className="px-6 py-2 bg-red-600 text-paper rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+          >
+            Delete
+          </button>
+        )}
       </div>
+      {issue && (
+        <div className="pt-2">
+          <a
+            href={`/admin/issues/${issue.id}/preview`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-sm font-medium text-primary hover:text-primary-light"
+          >
+            Home page preview →
+          </a>
+        </div>
+      )}
+      <ConfirmDialog
+        open={confirmDelete}
+        message="Delete this issue and all its articles? This cannot be undone."
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </form>
   );
 }

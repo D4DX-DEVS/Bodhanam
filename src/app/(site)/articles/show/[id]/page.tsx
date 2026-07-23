@@ -68,7 +68,9 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <>
-    {isDraftPreview && <DraftPreviewBar articleId={article.id} />}
+    {isDraftPreview && (
+      <DraftPreviewBar articleId={article.id} issueId={article.issueId} />
+    )}
     <div className="min-h-screen max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-10">
       <article className="min-w-0">
       {/* Article Header */}

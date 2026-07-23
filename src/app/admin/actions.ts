@@ -120,6 +120,21 @@ export async function updateIssueAction(
   return issue;
 }
 
+export async function setIssuePublishedAction(id: number, published: boolean) {
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
+
+  const issue = await db.issue.update({
+    where: { id },
+    data: { published },
+  });
+
+  revalidatePath("/admin/issues");
+  revalidatePath(`/issue/${id}`);
+  revalidatePath("/");
+  return issue;
+}
+
 export async function deleteIssueAction(id: number) {
   const session = await getSession();
   if (!session) throw new Error("Unauthorized");
@@ -140,6 +155,8 @@ export async function createArticleAction(data: {
   bodyHtml: string;
   coverImage: string | null;
   order: number;
+  covernum: number;
+  slug: string | null;
   period: string | null;
   issueId: number;
   published: boolean;
@@ -177,6 +194,8 @@ export async function updateArticleAction(
     bodyHtml: string;
     coverImage: string | null;
     order: number;
+    covernum: number;
+    slug: string | null;
     period: string | null;
     issueId: number;
     published: boolean;
@@ -201,22 +220,6 @@ export async function updateArticleAction(
   revalidatePath(`/issue/${oldArticle?.issueId}`);
   revalidatePath(`/issue/${data.issueId}`);
   revalidatePath(`/article/${id}`);
-  revalidatePath("/");
-  return article;
-}
-
-export async function setArticlePublishedAction(id: number, published: boolean) {
-  const session = await getSession();
-  if (!session) throw new Error("Unauthorized");
-
-  const article = await db.article.update({
-    where: { id },
-    data: { published },
-  });
-
-  revalidatePath("/admin/articles");
-  revalidatePath(`/issue/${article.issueId}`);
-  revalidatePath(`/articles/show/${id}`);
   revalidatePath("/");
   return article;
 }
