@@ -95,12 +95,8 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* Smooth transitions for theme toggle */
-* {
-  transition-property: background-color, border-color, color;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 0.3s;
-}
+/* ponytail: theme transition on body only — a universal `*` transition
+   animates color on every DOM node at once and makes the switch feel like 1–2s. */
 
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -124,6 +120,7 @@ body {
   margin-top: 2rem;
   margin-bottom: 1rem;
   color: var(--ink);
+  text-align: left;
 }
 
 .prose-ml h3 {
@@ -132,6 +129,7 @@ body {
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
   color: var(--ink);
+  text-align: left;
 }
 
 .prose-ml p {
