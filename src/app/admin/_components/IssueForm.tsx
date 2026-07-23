@@ -154,10 +154,13 @@ export default function IssueForm({ issue }: IssueFormProps) {
         <label className="block text-sm font-medium text-ink mb-2">
           Cover Image
         </label>
-        <ImageUpload
-          value={formData.coverImage}
-          onChange={(url) => setFormData({ ...formData, coverImage: url })}
-        />
+        {/* Constrained width — issue covers are portrait, no need for a giant preview */}
+        <div className="max-w-[200px]">
+          <ImageUpload
+            value={formData.coverImage}
+            onChange={(url) => setFormData({ ...formData, coverImage: url })}
+          />
+        </div>
       </div>
 
       <div className="flex gap-4">
@@ -189,11 +192,15 @@ export default function IssueForm({ issue }: IssueFormProps) {
         )}
       </div>
       {issue && (
-        <div className="pt-2">
+        <div className="flex flex-wrap items-center gap-4 pt-2">
+          <a
+            href={`/admin/articles/new?issue=${issue.id}`}
+            className="px-5 py-2 border border-default rounded-lg font-medium text-sm text-ink hover:border-primary hover:text-primary"
+          >
+            + Add Article to this Issue
+          </a>
           <a
             href={`/admin/issues/${issue.id}/preview`}
-            target="_blank"
-            rel="noreferrer"
             className="text-sm font-medium text-primary hover:text-primary-light"
           >
             Home page preview →

@@ -64,7 +64,13 @@ export default async function IssueHomePreviewPage({
     ...coverStories.map((a) => a.id),
     ...columnSections.map((s) => s.article.id),
   ]);
-  const remainingArticles = issue.articles.filter((a) => !usedIds.has(a.id));
+  // ലേഖനങ്ങൾ: same hybrid rule as the live home page — prefer ലേഖനം-labelled
+  // articles, else fall back to everything not used above.
+  const unused = issue.articles.filter((a) => !usedIds.has(a.id));
+  const lekhanam = unused.filter(
+    (a) => a.category && normalizeCategoryName(a.category).includes("ലേഖനം")
+  );
+  const remainingArticles = lekhanam.length > 0 ? lekhanam : unused;
 
   return (
     <div>

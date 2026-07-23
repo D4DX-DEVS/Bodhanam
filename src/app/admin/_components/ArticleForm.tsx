@@ -23,6 +23,7 @@ interface IssueOption {
 interface ArticleFormProps {
   issues: IssueOption[];
   categorySuggestions?: string[];
+  defaultIssueId?: number;
   article?: {
     id: number;
     title: string;
@@ -56,6 +57,7 @@ const EMPTY_FORM = {
 export default function ArticleForm({
   issues,
   categorySuggestions = [],
+  defaultIssueId,
   article,
 }: ArticleFormProps) {
   const router = useRouter();
@@ -76,7 +78,7 @@ export default function ArticleForm({
     slug: article?.slug ?? "",
   });
   const [issueId, setIssueId] = useState(
-    String(article?.issueId ?? issues[0]?.id ?? "")
+    String(article?.issueId ?? defaultIssueId ?? issues[0]?.id ?? "")
   );
 
   const save = async () => {
@@ -107,8 +109,9 @@ export default function ArticleForm({
         covernum: parseInt(String(formData.covernum)) || 0,
         slug: formData.slug.trim() || null,
         period: null,
-        // Visibility is controlled by publishing the issue, not the article.
-        published: true,
+        // Publish is issue-level only: saving never changes the article's
+        // published flag (existing value kept; new articles start null).
+        published: article ? article.published : null,
         issueId: issueIdNum,
       };
 

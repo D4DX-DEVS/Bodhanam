@@ -61,13 +61,18 @@ export default async function Home() {
       if (article) columnSections.push({ column, article });
     }
 
-    // ലേഖനങ്ങൾ: this issue's remaining articles — same convention as the
-    // reference site, not a sitewide "recent articles" feed.
+    // ലേഖനങ്ങൾ: old CMS marked these "ലേഖനം / പഠനം". Prefer that label;
+    // issues entered without it (e.g. issue 57) fall back to every article
+    // not already shown as cover story or column pick.
     const usedIds = new Set([
       ...covers.map((a) => a.id),
       ...columnSections.map((s) => s.article.id),
     ]);
-    remainingArticles = latestIssue.articles.filter((a) => !usedIds.has(a.id));
+    const unused = latestIssue.articles.filter((a) => !usedIds.has(a.id));
+    const lekhanam = unused.filter(
+      (a) => a.category && normalizeCategoryName(a.category).includes("ലേഖനം")
+    );
+    remainingArticles = lekhanam.length > 0 ? lekhanam : unused;
   }
 
   return (

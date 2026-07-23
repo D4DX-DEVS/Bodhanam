@@ -143,7 +143,13 @@ export default async function ArticlesPage({
                       {article.category || "—"}
                     </td>
                     <td className="px-6 py-4">
-                      <StatusBadge published={article.published} />
+                      {/* Publish is issue-level: article is live only when its issue is published */}
+                      <StatusBadge
+                        published={
+                          (article.issue?.published ?? false) &&
+                          article.published !== false
+                        }
+                      />
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="inline-flex items-center gap-1">
