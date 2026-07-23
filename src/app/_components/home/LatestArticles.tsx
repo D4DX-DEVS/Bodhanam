@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import Media from "@/app/_components/Media";
 import { cleanExcerpt } from "@/lib/text";
 import type { getCoverStories } from "@/lib/data";
@@ -8,10 +7,8 @@ type Article = Awaited<ReturnType<typeof getCoverStories>>[number];
 
 export default function LatestArticles({
   articles,
-  issueId,
 }: {
   articles: Article[];
-  issueId: number;
 }) {
   // Up to 6 in two rows of 3; flex-wrap + justify-center keeps a partial
   // last row (e.g. 2 of 5) centered instead of left-orphaned.
@@ -20,17 +17,10 @@ export default function LatestArticles({
 
   return (
     <section className="py-5 md:py-6">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h2 className="font-serif-ml text-2xl font-bold text-ink md:text-3xl">
+      <div className="mb-4">
+        <h2 className="font-serif-ml text-xl font-bold text-ink md:text-2xl">
           ലേഖനങ്ങൾ
         </h2>
-        <Link
-          href={`/issue/${issueId}#contents`}
-          className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary-light"
-        >
-          View all
-          <ArrowRight size={15} strokeWidth={2} />
-        </Link>
       </div>
       <div className="flex flex-wrap justify-center gap-5">
         {shown.map((article) => (

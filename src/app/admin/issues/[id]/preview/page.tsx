@@ -97,9 +97,9 @@ export default async function IssueHomePreviewPage({
             &ldquo;Cover story slot&rdquo; to 1–4 — they will appear here.
           </div>
         )}
-        <FeaturedStories stories={coverStories} issueId={issue.id} />
+        <FeaturedStories stories={coverStories} />
         <ColumnsSection sections={columnSections} />
-        <LatestArticles articles={remainingArticles} issueId={issue.id} />
+        <LatestArticles articles={remainingArticles} />
       </div>
     </div>
   );

@@ -53,8 +53,8 @@ export default async function IssuePage({ params }: Props) {
   return (
     <div className="min-h-screen">
       {/* Issue Header */}
-      <section className="border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 lg:py-16">
+      <section>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 md:pt-14 lg:pt-16 pb-4 md:pb-6">
           <div className="grid grid-cols-1 md:grid-cols-[minmax(0,240px)_1fr] gap-8 lg:gap-12 items-center">
             <div className="mx-auto w-full max-w-[220px] md:mx-0">
               <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-lg">
@@ -84,7 +84,7 @@ export default async function IssuePage({ params }: Props) {
       </section>
 
       {/* Contents — one dense uniform grid, clustered by category via chips */}
-      <section id="contents" className="py-10 md:py-14 scroll-mt-20">
+      <section id="contents" className="pt-2 pb-10 md:pb-14 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-6 flex items-center gap-3">
             <h2 className="font-serif-ml text-xl md:text-2xl font-bold text-ink">

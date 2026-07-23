@@ -22,7 +22,7 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
   return (
     <section className="py-5 md:py-6">
       <div
-        className="relative overflow-hidden rounded-[20px] border px-5 py-5 sm:px-7 sm:py-6 lg:px-8"
+        className="relative overflow-hidden rounded-[20px] border px-4 py-4 sm:px-6 sm:py-5 lg:px-7"
         style={{ borderColor: "var(--hero-border)", backgroundColor: "var(--hero-bg)" }}
       >
         <IslamicPattern className="opacity-[0.15] [mask-image:linear-gradient(to_left,black,transparent)]" />
@@ -57,7 +57,7 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
             >
               Latest Issue
             </span>
-            <h1 className="font-serif-ml text-lg font-bold leading-tight text-ink md:text-xl">
+            <h1 className="font-serif-ml text-base font-bold leading-tight text-ink md:text-lg">
               {issue.period}
             </h1>
             <p className="mt-1.5 text-sm font-medium text-muted">
