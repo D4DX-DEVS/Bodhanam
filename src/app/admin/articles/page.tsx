@@ -82,6 +82,7 @@ export default async function ArticlesPage({
               type="text"
               name="q"
               defaultValue={query}
+              autoComplete="off"
               placeholder="Search by title…"
               className="pl-10 pr-4 py-2.5 w-72 border border-default rounded-xl text-sm text-ink bg-white dark:bg-[#242424] focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
             />
@@ -155,7 +156,6 @@ export default async function ArticlesPage({
                         </Link>
                         <Link
                           href={`/articles/show/${article.id}`}
-                          target="_blank"
                           title="View"
                           className="p-2 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors"
                         >
