@@ -19,9 +19,23 @@ export default async function IssuesPage({
   const pageSize = 20;
   const query = q?.trim() || "";
 
-  const where = query
-    ? { period: { contains: query, mode: "insensitive" as const } }
-    : {};
+  // Match period text, plus "23/2", "vol 23", or a bare number against volume/issueNo.
+  let where = {};
+  if (query) {
+    const or: object[] = [
+      { period: { contains: query, mode: "insensitive" as const } },
+    ];
+    const slash = query.match(/^(\d+)\s*\/\s*(\d+)$/);
+    const vol = query.match(/^vol(?:ume)?\.?\s*(\d+)$/i);
+    if (slash) {
+      or.push({ volume: parseInt(slash[1]), issueNo: parseInt(slash[2]) });
+    } else if (vol) {
+      or.push({ volume: parseInt(vol[1]) });
+    } else if (/^\d+$/.test(query)) {
+      or.push({ volume: parseInt(query) }, { issueNo: parseInt(query) });
+    }
+    where = { OR: or };
+  }
 
   const [issues, total] = await Promise.all([
     db.issue.findMany({
@@ -64,7 +78,8 @@ export default async function IssuesPage({
               type="text"
               name="q"
               defaultValue={query}
-              placeholder="Search by period…"
+              autoComplete="off"
+              placeholder="Search period, 23/2, vol 23…"
               className="pl-10 pr-4 py-2.5 w-72 border border-default rounded-xl text-sm text-ink bg-white dark:bg-[#242424] focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
             />
           </div>

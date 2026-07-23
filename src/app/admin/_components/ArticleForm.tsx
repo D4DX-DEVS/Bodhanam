@@ -346,16 +346,12 @@ export default function ArticleForm({
               </button>
               <a
                 href={`/articles/show/${savedId}`}
-                target="_blank"
-                rel="noreferrer"
                 className="px-5 py-2.5 border border-default rounded-lg font-medium text-sm text-center text-ink hover:border-primary hover:text-primary"
               >
                 Preview article
               </a>
               <a
                 href={`/admin/issues/${issueId}/preview`}
-                target="_blank"
-                rel="noreferrer"
                 className="px-5 py-2.5 border border-default rounded-lg font-medium text-sm text-center text-ink hover:border-primary hover:text-primary"
               >
                 Home page preview
