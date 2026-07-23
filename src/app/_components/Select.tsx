@@ -35,12 +35,15 @@ export default function Select({
       <RadixSelect.Root value={value} onValueChange={onValueChange}>
         <RadixSelect.Trigger
           aria-label={ariaLabel}
-          className={`inline-flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-sm text-ink outline-none transition-colors focus-visible:border-primary data-[state=open]:border-primary ${className}`}
+          className={`group inline-flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-sm text-ink outline-none transition-colors focus-visible:border-primary data-[state=open]:border-primary ${className}`}
           style={{ borderColor: "var(--border)", backgroundColor: "var(--paper-elevated)" }}
         >
           <RadixSelect.Value />
           <RadixSelect.Icon>
-            <ChevronDown size={16} className="text-muted" />
+            <ChevronDown
+              size={16}
+              className="text-muted transition-transform duration-200 group-data-[state=open]:rotate-180"
+            />
           </RadixSelect.Icon>
         </RadixSelect.Trigger>
 

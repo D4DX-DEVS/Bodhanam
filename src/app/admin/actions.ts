@@ -4,12 +4,25 @@ import { verifyLogin, createSession, destroySession, getSession } from "@/lib/au
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { sanitizeArticleHtml } from "@/lib/sanitize";
+import { rateLimit } from "@/lib/rateLimit";
 
 export async function loginAction(
   email: string,
   password: string
 ): Promise<{ error: string } | { error?: undefined }> {
+  // Throttle brute force. Key by email (non-spoofable per target account) AND
+  // by IP. X-Forwarded-For is client-controlled, so the IP bucket alone can be
+  // rotated around — the per-account bucket is the real guard. 10 / 15 min each.
+  const h = await headers();
+  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const acct = email.toLowerCase().trim();
+  const window = 15 * 60_000;
+  if (!rateLimit(`login:acct:${acct}`, 10, window) || !rateLimit(`login:ip:${ip}`, 30, window)) {
+    return { error: "Too many attempts. Try again in a few minutes." };
+  }
+
   const user = await verifyLogin(email, password);
   if (!user) {
     return { error: "Invalid email or password" };

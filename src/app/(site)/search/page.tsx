@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { Search as SearchIcon } from "lucide-react";
 import Pagination from "@/app/_components/Pagination";
 import { DEFAULT_IMAGE } from "@/app/_components/Media";
+import CategorySelect from "./CategorySelect";
 
 type SearchPageProps = {
   searchParams: Promise<{ q?: string; page?: string; cat?: string }>;
@@ -30,55 +31,38 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <h1 className="font-serif-ml text-4xl md:text-5xl font-bold text-ink mb-6 leading-tight">
             Search
           </h1>
-          <form action="/search" method="get" className="relative mx-auto max-w-2xl">
-            <SearchIcon
-              size={20}
-              className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted"
-            />
-            <input
-              type="text"
-              name="q"
-              defaultValue={q ?? ""}
-              autoComplete="off"
-              placeholder="Search articles, authors…"
-              aria-label="Search articles, authors"
-              className="w-full rounded-full border py-4 pl-13 pr-32 text-base text-ink shadow-sm outline-none transition-colors focus:border-primary"
-              style={{
-                borderColor: "var(--border)",
-                backgroundColor: "var(--paper-elevated)",
-                paddingLeft: "3.25rem",
-              }}
-            />
-            <button
-              type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium text-white transition-colors"
-              style={{ backgroundColor: "var(--primary)" }}
-            >
-              Search
-            </button>
-            {/* Category filter — submitting resets to page 1 automatically
-                (no page field in the form) */}
-            <div className="mt-4 flex items-center justify-center gap-2">
-              <select
-                name="cat"
-                defaultValue={cat ?? ""}
-                className="cursor-pointer rounded-full border px-4 py-2 text-sm text-ink outline-none"
-                style={{ borderColor: "var(--border)", backgroundColor: "var(--paper)" }}
-              >
-                <option value="">All categories</option>
-                {categories.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+          <form action="/search" method="get" className="mx-auto max-w-2xl">
+            <div className="relative">
+              <SearchIcon
+                size={20}
+                className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-muted"
+              />
+              <input
+                type="text"
+                name="q"
+                defaultValue={q ?? ""}
+                autoComplete="off"
+                placeholder="Search articles, authors…"
+                aria-label="Search articles, authors"
+                className="w-full rounded-full border py-4 pr-32 text-base text-ink shadow-sm outline-none transition-colors focus:border-primary"
+                style={{
+                  borderColor: "var(--border)",
+                  backgroundColor: "var(--paper-elevated)",
+                  paddingLeft: "3.25rem",
+                }}
+              />
               <button
                 type="submit"
-                className="cursor-pointer rounded-full border px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
-                style={{ borderColor: "var(--border)" }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium text-white transition-colors"
+                style={{ backgroundColor: "var(--primary)" }}
               >
-                Filter
+                Search
               </button>
+            </div>
+            {/* Category filter — auto-submits on change, resets to page 1
+                automatically (no page field in the form) */}
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <CategorySelect categories={categories} initial={cat || "all"} />
             </div>
           </form>
           {q && (
