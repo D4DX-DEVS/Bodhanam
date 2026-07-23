@@ -22,7 +22,7 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
   return (
     <section className="py-5 md:py-6">
       <div
-        className="relative overflow-hidden rounded-[20px] border px-5 py-6 sm:px-8 sm:py-8 lg:px-10"
+        className="relative overflow-hidden rounded-[20px] border px-5 py-5 sm:px-7 sm:py-6 lg:px-8"
         style={{ borderColor: "var(--hero-border)", backgroundColor: "var(--hero-bg)" }}
       >
         <IslamicPattern className="opacity-[0.15] [mask-image:linear-gradient(to_left,black,transparent)]" />
@@ -31,7 +31,7 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
           className="hidden lg:block absolute -right-8 -top-6 h-56 w-56 opacity-70"
         />
 
-        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center">
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center">
           {/* Cover */}
           <Link
             href={`/issue/${issue.id}`}
@@ -57,14 +57,14 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
             >
               Latest Issue
             </span>
-            <h1 className="font-serif-ml text-2xl font-bold leading-tight text-ink md:text-3xl">
+            <h1 className="font-serif-ml text-lg font-bold leading-tight text-ink md:text-xl">
               {issue.period}
             </h1>
             <p className="mt-1.5 text-sm font-medium text-muted">
               Vol. {issue.volume} · Issue {issue.issueNo}
             </p>
 
-            <div className="mt-5 flex justify-center gap-6 lg:justify-start">
+            <div className="mt-4 flex justify-center gap-6 lg:justify-start">
               <div className="flex items-center gap-2">
                 <FileText size={18} className="text-primary" strokeWidth={1.75} />
                 <div className="text-left">
@@ -81,7 +81,7 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
               <Link
                 href={`/issue/${issue.id}`}
                 className="btn-primary group/cta inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium"
@@ -99,7 +99,7 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
           {/* Mugavurap (editorial) excerpt */}
           {mugavurapArticle && (
             <div
-              className="hidden max-w-sm shrink-0 rounded-xl border p-6 lg:block lg:max-w-md"
+              className="hidden max-w-sm shrink-0 rounded-xl border p-5 lg:block lg:max-w-md"
               style={{ borderColor: "var(--hero-border)", backgroundColor: "var(--paper-elevated)" }}
             >
               {mugavurapArticle.category && (

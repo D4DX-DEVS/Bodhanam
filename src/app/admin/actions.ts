@@ -159,7 +159,7 @@ export async function createArticleAction(data: {
   slug: string | null;
   period: string | null;
   issueId: number;
-  published: boolean;
+  published: boolean | null;
 }) {
   const session = await getSession();
   if (!session) throw new Error("Unauthorized");
@@ -198,7 +198,7 @@ export async function updateArticleAction(
     slug: string | null;
     period: string | null;
     issueId: number;
-    published: boolean;
+    published: boolean | null;
   }
 ) {
   const session = await getSession();

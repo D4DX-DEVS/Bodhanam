@@ -42,8 +42,9 @@ export default function LatestArticles({
             <article className="article-card overflow-hidden">
               <Media src={article.coverImage} alt={article.title} ratio="16 / 9" />
               <div className="p-4">
-                {article.category && (
-                  <span className="text-xs font-medium uppercase tracking-wide text-primary">
+                {/* Chip hidden for ലേഖനം… — section heading already says it */}
+                {article.category && !article.category.includes("ലേഖനം") && (
+                  <span className="text-xs font-semibold uppercase tracking-wide text-muted">
                     {article.category}
                   </span>
                 )}
