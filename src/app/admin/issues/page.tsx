@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus, Search, Pencil, Eye } from "lucide-react";
 import Pagination from "@/app/_components/Pagination";
 import StatusBadge from "@/app/admin/_components/StatusBadge";
+import DeleteRowButton from "@/app/admin/_components/DeleteRowButton";
 
 export const metadata = {
   title: "Issues · Admin",
@@ -126,13 +127,13 @@ export default async function IssuesPage({
                         <Pencil size={16} />
                       </Link>
                       <Link
-                        href={`/issue/${issue.id}`}
-                        target="_blank"
-                        title="View"
+                        href={`/admin/issues/${issue.id}/preview`}
+                        title="Home preview"
                         className="p-2 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors"
                       >
                         <Eye size={16} />
                       </Link>
+                      <DeleteRowButton kind="issue" id={issue.id} />
                     </div>
                   </td>
                 </tr>

@@ -3,6 +3,7 @@ import {
   getColumns,
   getRecentIssuesForPreview,
   normalizeCategoryName,
+  withDerivedExcerpts,
 } from "@/lib/data";
 import LatestIssueHero from "@/app/_components/home/LatestIssueHero";
 import FeaturedStories from "@/app/_components/home/FeaturedStories";
@@ -41,6 +42,7 @@ export default async function Home() {
   let remainingArticles: Article[] = [];
 
   if (latestIssue) {
+    latestIssue.articles = await withDerivedExcerpts(latestIssue.articles);
     const mugavurapTarget = normalizeCategoryName("മുഖക്കുറിപ്പ്");
     mugavurapArticle = latestIssue.articles.find(
       (a) => a.category && normalizeCategoryName(a.category) === mugavurapTarget

@@ -10,6 +10,7 @@ import {
 import ImageUpload from "./ImageUpload";
 import Editor from "./Editor";
 import ConfirmDialog from "./ConfirmDialog";
+import CategoryCombobox from "./CategoryCombobox";
 import Select from "@/app/_components/Select";
 
 interface IssueOption {
@@ -21,6 +22,7 @@ interface IssueOption {
 
 interface ArticleFormProps {
   issues: IssueOption[];
+  categorySuggestions?: string[];
   article?: {
     id: number;
     title: string;
@@ -30,6 +32,8 @@ interface ArticleFormProps {
     bodyHtml: string;
     coverImage: string | null;
     order: number;
+    covernum: number;
+    slug: string | null;
     period: string | null;
     issueId: number;
     published: boolean | null;
@@ -37,11 +41,29 @@ interface ArticleFormProps {
   };
 }
 
-export default function ArticleForm({ issues, article }: ArticleFormProps) {
+const EMPTY_FORM = {
+  title: "",
+  author: "",
+  category: "",
+  excerpt: "",
+  bodyHtml: "",
+  coverImage: "",
+  order: "",
+  covernum: "",
+  slug: "",
+};
+
+export default function ArticleForm({
+  issues,
+  categorySuggestions = [],
+  article,
+}: ArticleFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [savedId, setSavedId] = useState<number | null>(null);
+  const [editorKey, setEditorKey] = useState(0);
   const [formData, setFormData] = useState({
     title: article?.title ?? "",
     author: article?.author ?? "",
@@ -50,10 +72,14 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
     bodyHtml: article?.bodyHtml ?? "",
     coverImage: article?.coverImage ?? "",
     order: article?.order != null ? String(article.order) : "",
-    issueId: String(article?.issueId ?? issues[0]?.id ?? ""),
+    covernum: article?.covernum ? String(article.covernum) : "",
+    slug: article?.slug ?? "",
   });
+  const [issueId, setIssueId] = useState(
+    String(article?.issueId ?? issues[0]?.id ?? "")
+  );
 
-  const save = async (published: boolean) => {
+  const save = async () => {
     setLoading(true);
     setError("");
 
@@ -63,8 +89,8 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
         setLoading(false);
         return;
       }
-      const issueId = parseInt(String(formData.issueId));
-      if (!issueId) {
+      const issueIdNum = parseInt(issueId);
+      if (!issueIdNum) {
         setError("Please select an issue");
         setLoading(false);
         return;
@@ -73,27 +99,43 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
       const payload = {
         title: formData.title,
         author: formData.author || null,
-        category: formData.category || null,
+        category: formData.category.trim() || null,
         excerpt: formData.excerpt || null,
         bodyHtml: formData.bodyHtml,
         coverImage: formData.coverImage || null,
         order: parseInt(String(formData.order)) || 0,
+        covernum: parseInt(String(formData.covernum)) || 0,
+        slug: formData.slug.trim() || null,
         period: null,
-        issueId,
-        published,
+        // Visibility is controlled by publishing the issue, not the article.
+        published: true,
+        issueId: issueIdNum,
       };
 
+      let id: number;
       if (article) {
         await updateArticleAction(article.id, payload);
-        router.push("/admin/articles");
+        id = article.id;
       } else {
         const created = await createArticleAction(payload);
-        router.push(`/articles/show/${created.id}`);
+        id = created.id;
       }
+      setSavedId(id);
+      setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
       setLoading(false);
     }
+  };
+
+  const startNewArticle = () => {
+    setSavedId(null);
+    if (article) {
+      router.push("/admin/articles/new");
+      return;
+    }
+    setFormData(EMPTY_FORM);
+    setEditorKey((k) => k + 1); // remount editor to clear content
   };
 
   const handleDelete = async () => {
@@ -111,20 +153,6 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
 
   return (
     <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-      {article && (
-        <div className="text-sm">
-          Status:{" "}
-          <span
-            className={
-              article.published === false
-                ? "font-medium text-amber-600 dark:text-amber-400"
-                : "font-medium text-green-600 dark:text-green-400"
-            }
-          >
-            {article.published === false ? "Draft" : "Published"}
-          </span>
-        </div>
-      )}
       {error && (
         <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-700 dark:text-red-300">
           {error}
@@ -163,18 +191,16 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
           <label className="block text-sm font-medium text-ink mb-2">
             Category
           </label>
-          <input
-            type="text"
+          <CategoryCombobox
             value={formData.category}
-            onChange={(e) =>
-              setFormData({ ...formData, category: e.target.value })
-            }
-            className="w-full px-4 py-2 border border-default rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-ink bg-paper"
+            onChange={(category) => setFormData({ ...formData, category })}
+            suggestions={categorySuggestions}
+            placeholder="Type your own or pick a suggestion"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-ink mb-2">
-            Order
+            Position (order in section)
           </label>
           <input
             type="number"
@@ -191,13 +217,49 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-ink mb-2">
+            Cover story slot (optional)
+          </label>
+          <input
+            type="number"
+            min="0"
+            max="6"
+            value={formData.covernum}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                covernum: e.target.value.replace(/[^0-9]/g, ""),
+              })
+            }
+            className="w-full px-4 py-2 border border-default rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-ink bg-paper [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
+          <p className="mt-1 text-xs text-muted">
+            1–4 = home-page cover story in that slot. Empty = regular article.
+          </p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-ink mb-2">
+            Kicker label (cover story badge)
+          </label>
+          <input
+            type="text"
+            value={formData.slug}
+            onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+            placeholder="e.g. ഫത്‌വ, പഠനം"
+            className="w-full px-4 py-2 border border-default rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-ink bg-paper"
+          />
+        </div>
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-ink mb-2">
           Issue *
         </label>
         <Select
-          value={formData.issueId}
-          onValueChange={(v) => setFormData({ ...formData, issueId: v })}
+          value={issueId}
+          onValueChange={setIssueId}
           ariaLabel="Select an issue"
           className="w-full"
           options={issues.map((iss) => ({
@@ -239,41 +301,21 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
           Content *
         </label>
         <Editor
+          key={editorKey}
           value={formData.bodyHtml}
           onChange={(html) => setFormData({ ...formData, bodyHtml: html })}
         />
       </div>
 
       <div className="flex gap-4">
-        {article ? (
-          <>
-            <button
-              type="button"
-              onClick={() => save(false)}
-              disabled={loading}
-              className="flex-1 px-6 py-2 border border-default rounded-lg font-medium text-ink hover:bg-paper disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Save as Draft"}
-            </button>
-            <button
-              type="button"
-              onClick={() => save(true)}
-              disabled={loading}
-              className="flex-1 px-6 py-2 btn-primary rounded-lg font-medium disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Publish"}
-            </button>
-          </>
-        ) : (
-          <button
-            type="button"
-            onClick={() => save(false)}
-            disabled={loading}
-            className="flex-1 px-6 py-2 btn-primary rounded-lg font-medium disabled:opacity-50"
-          >
-            {loading ? "Saving..." : "Save & Preview"}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={save}
+          disabled={loading}
+          className="flex-1 px-6 py-2 btn-primary rounded-lg font-medium disabled:opacity-50"
+        >
+          {loading ? "Saving..." : "Save"}
+        </button>
         {article && (
           <button
             type="button"
@@ -285,6 +327,51 @@ export default function ArticleForm({ issues, article }: ArticleFormProps) {
           </button>
         )}
       </div>
+
+      {/* Post-save: what next? */}
+      {savedId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-[#242424] border border-default p-6 space-y-4">
+            <h2 className="text-lg font-bold text-ink">Article saved</h2>
+            <p className="text-sm text-muted">
+              Publish happens from the Issue page once all articles are added.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={startNewArticle}
+                className="px-5 py-2.5 btn-primary rounded-lg font-medium text-sm"
+              >
+                Add another article
+              </button>
+              <a
+                href={`/articles/show/${savedId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2.5 border border-default rounded-lg font-medium text-sm text-center text-ink hover:border-primary hover:text-primary"
+              >
+                Preview article
+              </a>
+              <a
+                href={`/admin/issues/${issueId}/preview`}
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2.5 border border-default rounded-lg font-medium text-sm text-center text-ink hover:border-primary hover:text-primary"
+              >
+                Home page preview
+              </a>
+              <button
+                type="button"
+                onClick={() => router.push("/admin/articles")}
+                className="px-5 py-2.5 border border-default rounded-lg font-medium text-sm text-ink hover:border-primary hover:text-primary"
+              >
+                Back to Articles
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ConfirmDialog
         open={confirmDelete}
         message="Delete this article? This cannot be undone."

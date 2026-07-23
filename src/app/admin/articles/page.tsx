@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus, Search, Pencil, Eye } from "lucide-react";
 import Pagination from "@/app/_components/Pagination";
 import StatusBadge from "@/app/admin/_components/StatusBadge";
+import DeleteRowButton from "@/app/admin/_components/DeleteRowButton";
 import IssueFilterSelect from "./IssueFilterSelect";
 
 export const metadata = {
@@ -160,6 +161,7 @@ export default async function ArticlesPage({
                         >
                           <Eye size={16} />
                         </Link>
+                        <DeleteRowButton kind="article" id={article.id} />
                       </div>
                     </td>
                   </tr>
