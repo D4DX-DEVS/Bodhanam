@@ -82,7 +82,7 @@ export default async function Home() {
       )}
 
       {latestIssue && (
-        <FeaturedStories stories={coverStories} issueId={latestIssue.id} />
+        <FeaturedStories stories={coverStories} />
       )}
 
       {latestIssue && (
@@ -90,7 +90,7 @@ export default async function Home() {
       )}
 
       {latestIssue && (
-        <LatestArticles articles={remainingArticles} issueId={latestIssue.id} />
+        <LatestArticles articles={remainingArticles} />
       )}
 
       <ArchivePreview issues={recentIssues} />

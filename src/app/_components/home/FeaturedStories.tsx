@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Media, { DEFAULT_IMAGE } from "@/app/_components/Media";
 import type { getCoverStories } from "@/lib/data";
 
@@ -10,10 +10,8 @@ type Article = Awaited<ReturnType<typeof getCoverStories>>[number];
 
 export default function FeaturedStories({
   stories,
-  issueId,
 }: {
   stories: Article[];
-  issueId: number;
 }) {
   // ponytail: max 4 cover stories; right column static, only left feature cycles
   const items = stories.slice(0, 4);
@@ -37,14 +35,10 @@ export default function FeaturedStories({
 
   return (
     <section className="py-5 md:py-6">
-      <div className="mb-4 flex items-center justify-end gap-3">
-        <Link
-          href={`/issue/${issueId}#contents`}
-          className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary-light"
-        >
-          View all
-          <ArrowRight size={15} strokeWidth={2} />
-        </Link>
+      <div className="mb-4">
+        <h2 className="font-serif-ml text-xl font-bold text-ink md:text-2xl">
+          കവര്‍‌സ്റ്റോറി
+        </h2>
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
