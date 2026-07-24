@@ -193,8 +193,11 @@ export default function Editor({ value, onChange }: EditorProps) {
         </div>
       )}
 
-      {/* Editor — override prose-ml's 65ch reading width so typing uses full field width */}
-      <div className="p-4 prose-ml prose prose-invert max-w-none" style={{ maxWidth: "none" }}>
+      {/* Fixed-height scroll area — long articles scroll here, not the whole admin page */}
+      <div
+        className="max-h-[60vh] overflow-y-auto p-4 prose-ml prose prose-invert max-w-none"
+        style={{ maxWidth: "none" }}
+      >
         <EditorContent editor={editor} />
       </div>
     </div>

@@ -151,6 +151,7 @@ export async function createArticleAction(data: {
   title: string;
   author: string | null;
   category: string | null;
+  subcategory: string | null;
   excerpt: string | null;
   bodyHtml: string;
   coverImage: string | null;
@@ -190,6 +191,7 @@ export async function updateArticleAction(
     title: string;
     author: string | null;
     category: string | null;
+    subcategory: string | null;
     excerpt: string | null;
     bodyHtml: string;
     coverImage: string | null;

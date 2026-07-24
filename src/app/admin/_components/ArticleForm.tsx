@@ -10,8 +10,18 @@ import {
 import ImageUpload from "./ImageUpload";
 import Editor from "./Editor";
 import ConfirmDialog from "./ConfirmDialog";
-import CategoryCombobox from "./CategoryCombobox";
 import Select from "@/app/_components/Select";
+
+// Fixed home-section categories — must match Column.name values exactly (old
+// CMS spelling, incl. legacy ZWJ chillu letters) so homepage matching works.
+const LEKHANAM_CATEGORY = "ലേഖനം / പഠനം";
+const CATEGORY_OPTIONS = [
+  { value: "മുഖക്കുറിപ്പ്‌", label: "മുഖക്കുറിപ്പ്" },
+  { value: "ഖുര്‍ആന്‍", label: "ഖുർആൻ" },
+  { value: "ബുക് ഷെല്‍ഫ്‌", label: "ബുക് ഷെൽഫ്" },
+  { value: "ചോദ്യോത്തരം", label: "ചോദ്യോത്തരം" },
+  { value: LEKHANAM_CATEGORY, label: "ലേഖനം" },
+];
 
 interface IssueOption {
   id: number;
@@ -22,13 +32,13 @@ interface IssueOption {
 
 interface ArticleFormProps {
   issues: IssueOption[];
-  categorySuggestions?: string[];
   defaultIssueId?: number;
   article?: {
     id: number;
     title: string;
     author: string | null;
     category: string | null;
+    subcategory: string | null;
     excerpt: string | null;
     bodyHtml: string;
     coverImage: string | null;
@@ -46,6 +56,7 @@ const EMPTY_FORM = {
   title: "",
   author: "",
   category: "",
+  subcategory: "",
   excerpt: "",
   bodyHtml: "",
   coverImage: "",
@@ -56,7 +67,6 @@ const EMPTY_FORM = {
 
 export default function ArticleForm({
   issues,
-  categorySuggestions = [],
   defaultIssueId,
   article,
 }: ArticleFormProps) {
@@ -70,6 +80,7 @@ export default function ArticleForm({
     title: article?.title ?? "",
     author: article?.author ?? "",
     category: article?.category ?? "",
+    subcategory: article?.subcategory ?? "",
     excerpt: article?.excerpt ?? "",
     bodyHtml: article?.bodyHtml ?? "",
     coverImage: article?.coverImage ?? "",
@@ -104,6 +115,10 @@ export default function ArticleForm({
         title: formData.title,
         author: formData.author || null,
         category: formData.category.trim() || null,
+        subcategory:
+          formData.category === LEKHANAM_CATEGORY
+            ? formData.subcategory.trim() || null
+            : null,
         excerpt: formData.excerpt || null,
         bodyHtml: formData.bodyHtml,
         coverImage: formData.coverImage || null,
@@ -194,12 +209,24 @@ export default function ArticleForm({
           <label className="block text-sm font-medium text-ink mb-2">
             Category
           </label>
-          <CategoryCombobox
+          <Select
             value={formData.category}
-            onChange={(category) => setFormData({ ...formData, category })}
-            suggestions={categorySuggestions}
-            placeholder="Type your own or pick a suggestion"
+            onValueChange={(category) => setFormData({ ...formData, category })}
+            ariaLabel="Select a category"
+            className="w-full"
+            options={CATEGORY_OPTIONS}
           />
+          {formData.category === LEKHANAM_CATEGORY && (
+            <input
+              type="text"
+              value={formData.subcategory}
+              onChange={(e) =>
+                setFormData({ ...formData, subcategory: e.target.value })
+              }
+              placeholder="Sub category (optional) — e.g. സാഹിത്യം"
+              className="mt-2 w-full px-4 py-2 border border-default rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-ink bg-paper"
+            />
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-ink mb-2">
