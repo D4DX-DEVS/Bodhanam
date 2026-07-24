@@ -1,7 +1,7 @@
 "use client";
 
 import * as RadixSelect from "@radix-ui/react-select";
-import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, X } from "lucide-react";
 
 export interface SelectOption {
   value: string;
@@ -15,6 +15,8 @@ interface SelectProps {
   name?: string;
   ariaLabel?: string;
   className?: string;
+  placeholder?: string;
+  clearable?: boolean;
 }
 
 /**
@@ -28,17 +30,19 @@ export default function Select({
   name,
   ariaLabel,
   className = "",
+  placeholder,
+  clearable = false,
 }: SelectProps) {
   return (
-    <>
+    <div className="relative">
       {name && <input type="hidden" name={name} value={value} />}
       <RadixSelect.Root value={value} onValueChange={onValueChange}>
         <RadixSelect.Trigger
           aria-label={ariaLabel}
-          className={`group inline-flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-sm text-ink outline-none transition-colors focus-visible:border-primary data-[state=open]:border-primary ${className}`}
+          className={`group inline-flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-sm text-ink outline-none transition-colors focus-visible:border-primary data-[state=open]:border-primary ${clearable && value ? "pr-9" : ""} ${className}`}
           style={{ borderColor: "var(--border)", backgroundColor: "var(--paper-elevated)" }}
         >
-          <RadixSelect.Value />
+          <RadixSelect.Value placeholder={placeholder} />
           <RadixSelect.Icon>
             <ChevronDown
               size={16}
@@ -46,6 +50,17 @@ export default function Select({
             />
           </RadixSelect.Icon>
         </RadixSelect.Trigger>
+        {clearable && value && (
+          <button
+            type="button"
+            aria-label="Clear selection"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => onValueChange("")}
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted hover:text-ink"
+          >
+            <X size={14} />
+          </button>
+        )}
 
         <RadixSelect.Portal>
           <RadixSelect.Content
@@ -81,6 +96,6 @@ export default function Select({
           </RadixSelect.Content>
         </RadixSelect.Portal>
       </RadixSelect.Root>
-    </>
+    </div>
   );
 }

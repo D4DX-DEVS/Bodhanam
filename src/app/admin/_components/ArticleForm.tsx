@@ -213,6 +213,8 @@ export default function ArticleForm({
             value={formData.category}
             onValueChange={(category) => setFormData({ ...formData, category })}
             ariaLabel="Select a category"
+            placeholder="Select a category"
+            clearable
             className="w-full"
             options={CATEGORY_OPTIONS}
           />
