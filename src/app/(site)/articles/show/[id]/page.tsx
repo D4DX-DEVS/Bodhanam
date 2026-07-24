@@ -79,12 +79,12 @@ export default async function ArticlePage({ params }: Props) {
           {article.category && (
             <span className="chip mb-4 block w-fit">{article.category}</span>
           )}
-          <h1 className="font-serif-ml text-3xl md:text-4xl font-bold text-ink mb-4 md:mb-6 leading-ml-title">
+          <h1 className="font-serif-ml text-3xl md:text-4xl font-bold text-ink mb-4 md:mb-6 leading-tight">
             {article.title}
           </h1>
           {article.author && (
-            <div className="flex items-center gap-3 text-base md:text-lg text-brand-red">
-              <User size={18} className="flex-shrink-0" />
+            <div className="flex items-center gap-3 text-sm md:text-base text-brand-red">
+              <User size={16} className="flex-shrink-0" />
               <span className="font-sans-ml font-medium">{article.author}</span>
             </div>
           )}
