@@ -32,10 +32,13 @@ export default function LatestArticles({
             <article className="article-card overflow-hidden">
               <Media src={article.coverImage} alt={article.title} ratio="16 / 9" />
               <div className="p-4">
-                {/* Chip hidden for ലേഖനം… — section heading already says it */}
-                {article.category && !article.category.includes("ലേഖനം") && (
+                {/* Prefer the admin-set sub-category label; otherwise fall back to
+                    the raw category — hidden for plain ലേഖനം since the section
+                    heading already says it */}
+                {(article.subcategory ||
+                  (article.category && !article.category.includes("ലേഖനം"))) && (
                   <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-                    {article.category}
+                    {article.subcategory || article.category}
                   </span>
                 )}
                 <h3 className="mt-1 font-serif-ml text-base font-bold leading-ml-title text-ink line-clamp-2">

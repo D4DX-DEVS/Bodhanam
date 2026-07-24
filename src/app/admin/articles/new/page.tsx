@@ -12,26 +12,11 @@ export default async function NewArticlePage({
 }) {
   const { issue } = await searchParams;
   const defaultIssueId = issue ? parseInt(issue) || undefined : undefined;
-  const [issues, categories] = await Promise.all([
-    db.issue.findMany({ orderBy: { id: "desc" } }),
-    db.article.findMany({
-      where: { category: { not: null } },
-      select: { category: true },
-      distinct: ["category"],
-      orderBy: { category: "asc" },
-    }),
-  ]);
-  const categorySuggestions = categories
-    .map((c) => c.category)
-    .filter((c): c is string => Boolean(c));
+  const issues = await db.issue.findMany({ orderBy: { id: "desc" } });
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-4xl font-bold text-ink mb-8">New Article</h1>
-      <ArticleForm
-        issues={issues}
-        categorySuggestions={categorySuggestions}
-        defaultIssueId={defaultIssueId}
-      />
+      <ArticleForm issues={issues} defaultIssueId={defaultIssueId} />
     </div>
   );
 }

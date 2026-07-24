@@ -25,6 +25,7 @@ model Article {
   title      String
   author     String?
   category   String?
+  subcategory String? // optional custom label shown on the ലേഖനം card; only used when category is ലേഖനം / പഠനം
   excerpt    String?
   bodyHtml   String
   coverImage String?
