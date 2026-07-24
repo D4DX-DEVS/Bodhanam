@@ -188,8 +188,8 @@ export default function AdminLayout({
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Logo — roomy block so it never squishes */}
-        <div className="px-6 pt-7 pb-6 border-b border-default flex items-start justify-between">
+        {/* Logo — same h-16 as the top bar so the border lines align */}
+        <div className="h-16 shrink-0 px-6 border-b border-default flex items-center justify-between">
           <div>
             <Image
               src={mounted && isDark ? "/images/logo-light.png" : "/images/logo1.png"}
@@ -197,9 +197,9 @@ export default function AdminLayout({
               height={40}
               width={160}
               priority
-              className="h-9 w-auto"
+              className="h-7 w-auto"
             />
-            <div className="mt-2 text-[11px] font-medium tracking-[0.18em] uppercase text-muted">
+            <div className="mt-1 text-[10px] font-medium tracking-[0.18em] uppercase text-muted">
               Admin Panel
             </div>
           </div>
