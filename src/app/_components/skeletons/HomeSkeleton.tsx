@@ -33,7 +33,7 @@ export function CoverStoriesSkeleton() {
     <section className="py-5 md:py-6" aria-busy="true" aria-label="Loading cover stories">
       <Skeleton className="mb-4 h-7 w-40" />
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
-        <Skeleton className="aspect-[4/3] w-full rounded-2xl sm:aspect-[16/9] lg:col-span-3" />
+        <Skeleton className="aspect-video w-full rounded-2xl lg:col-span-3" />
         <div className="flex flex-col gap-3 lg:col-span-2">
           {Array.from({ length: 3 }).map((_, i) => (
             <div

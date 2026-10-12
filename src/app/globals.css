@@ -415,6 +415,12 @@ h3 {
   color: var(--primary);
 }
 
+/* Cover-story autoplay progress pill */
+@keyframes slide-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 /* Cover-story rotation fade */
 @keyframes fade-swap {
   from { opacity: 0; }
