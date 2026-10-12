@@ -2,6 +2,7 @@ import Link from "next/link";
 import Media from "@/app/_components/Media";
 import { normalizeCategoryName, type getColumns, type getCoverStories } from "@/lib/data";
 import { cleanExcerpt } from "@/lib/text";
+import CardAuthor from "./CardAuthor";
 
 type Column = Awaited<ReturnType<typeof getColumns>>[number];
 type Article = Awaited<ReturnType<typeof getCoverStories>>[number];
@@ -35,20 +36,13 @@ export default function ColumnsSection({
                   <span className="text-xs font-medium uppercase tracking-wide text-primary">
                     {column.name}
                   </span>
-                  {/* min-h reserves 2 lines even for short titles, and the author
-                      line always renders (invisible if absent) — otherwise a
-                      1-line title or a missing author shifts the excerpt below
-                      up, misaligning it against neighboring cards in the row */}
-                  <h3 className="mt-1 min-h-[3rem] font-serif-ml text-base font-bold leading-ml-title text-ink line-clamp-2">
+                  {/* min-h reserves 2 title lines so a 1-line title doesn't
+                      shift the author/excerpt up against neighboring cards */}
+                  <h3 className="mt-1 min-h-[2.5rem] font-serif-ml text-base font-bold leading-[1.25] text-ink line-clamp-2">
                     {article.title}
                   </h3>
-                  <p
-                    className={`mt-1 text-xs font-medium text-brand-red ${
-                      article.author && !isDuplicateAuthor ? "" : "invisible"
-                    }`}
-                  >
-                    {(article.author && !isDuplicateAuthor && article.author) || " "}
-                  </p>
+                  {/* author equal to the column name is a placeholder, not a person */}
+                  <CardAuthor author={isDuplicateAuthor ? null : article.author} />
                   {article.excerpt && (
                     <p className="mt-2 text-sm leading-relaxed text-muted line-clamp-2">
                       {cleanExcerpt(article.excerpt)}

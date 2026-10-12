@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Media from "@/app/_components/Media";
 import { cleanExcerpt } from "@/lib/text";
+import CardAuthor from "./CardAuthor";
 import type { getCoverStories } from "@/lib/data";
 
 type Article = Awaited<ReturnType<typeof getCoverStories>>[number];
@@ -41,12 +42,10 @@ export default function LatestArticles({
                     {article.subcategory || article.category}
                   </span>
                 )}
-                <h3 className="mt-1 font-serif-ml text-base font-bold leading-ml-title text-ink line-clamp-2">
+                <h3 className="mt-1 font-serif-ml text-base font-bold leading-[1.25] text-ink line-clamp-2">
                   {article.title}
                 </h3>
-                {article.author && (
-                  <p className="mt-1 text-xs font-medium text-brand-red">{article.author}</p>
-                )}
+                <CardAuthor author={article.author} />
                 {article.excerpt && (
                   <p className="mt-2 text-sm leading-relaxed text-muted line-clamp-2">
                     {cleanExcerpt(article.excerpt)}
