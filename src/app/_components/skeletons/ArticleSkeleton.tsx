@@ -51,7 +51,7 @@ export function SidebarSkeleton() {
 export default function ArticleSkeleton() {
   return (
     <div
-      className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-10 lg:px-8"
+      className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-10 lg:px-8"
       aria-busy="true"
       aria-label="Loading"
     >
