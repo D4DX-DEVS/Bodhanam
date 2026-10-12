@@ -5,15 +5,23 @@ import { Search as SearchIcon } from "lucide-react";
 import Pagination from "@/app/_components/Pagination";
 import { DEFAULT_IMAGE } from "@/app/_components/Media";
 import YearSelect from "./YearSelect";
-
-export const metadata: Metadata = {
-  title: "Archives",
-  description: "Browse all issues of Bodhanam Quarterly",
-};
+import { pageMeta } from "@/lib/seo";
 
 type ArchivesPageProps = {
   searchParams: Promise<{ page?: string; q?: string; year?: string }>;
 };
+
+export async function generateMetadata({ searchParams }: ArchivesPageProps): Promise<Metadata> {
+  const { page, q, year } = await searchParams;
+  const pageNum = page ? parseInt(page) : 1;
+  return pageMeta({
+    title: pageNum > 1 ? `Archives — Page ${pageNum}` : "Archives",
+    description: "Every issue of ബോധനം (Bodhanam) Malayalam Islamic quarterly, with full tables of contents.",
+    path: pageNum > 1 ? `/archives?page=${pageNum}` : "/archives",
+    // filtered views duplicate the main listing
+    noindex: !!(q || (year && year !== "all")),
+  });
+}
 
 export default async function Archives({ searchParams }: ArchivesPageProps) {
   const { page, q, year } = await searchParams;
@@ -45,9 +53,9 @@ export default async function Archives({ searchParams }: ArchivesPageProps) {
         {/* Filters — plain GET form, works without JS */}
         <form
           method="get"
-          className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center"
+          className="mb-8 flex flex-row items-center gap-2 sm:gap-3 md:mb-12"
         >
-          <div className="relative flex-1">
+          <div className="relative min-w-0 flex-1">
             <SearchIcon
               size={16}
               className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"
@@ -56,35 +64,14 @@ export default async function Archives({ searchParams }: ArchivesPageProps) {
               type="text"
               name="q"
               defaultValue={query}
-              placeholder="Search year, volume, article title or author — e.g. 2024, Vol 21, ഖുർആൻ"
+              placeholder="Search year, volume, title or author"
+              aria-label="Search issues by year, volume, article title or author"
               className="w-full rounded-lg border py-2.5 pl-9 pr-3 text-sm text-ink"
               style={{ borderColor: "var(--border)", backgroundColor: "var(--paper-elevated)" }}
             />
           </div>
           <YearSelect years={years} initial={selectedYear} />
         </form>
-
-        {years.length > 1 && (
-          <div className="mb-12 flex flex-wrap items-center gap-x-1 gap-y-2 text-sm md:mb-16">
-            <Link
-              href="/archives"
-              className={selectedYear === "all" ? "font-semibold text-primary" : "text-muted hover:text-primary"}
-            >
-              All
-            </Link>
-            {years.map((y) => (
-              <span key={y} className="flex items-center gap-1">
-                <span className="text-muted">·</span>
-                <Link
-                  href={`/archives?year=${y}`}
-                  className={y === selectedYear ? "font-semibold text-primary" : "text-muted hover:text-primary"}
-                >
-                  {y}
-                </Link>
-              </span>
-            ))}
-          </div>
-        )}
 
         {issues.length === 0 && (
           <p className="text-muted font-sans-ml">No issues match this filter.</p>

@@ -2,11 +2,14 @@ import { getPage } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { sanitizeArticleHtml } from "@/lib/sanitize";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "About",
-  description: "Learn about Bodhanam Quarterly",
-};
+export const metadata: Metadata = pageMeta({
+  title: "About Bodhanam",
+  description:
+    "History of ബോധനം (Bodhanam): launched May 1976, a Malayalam Islamic quarterly academic journal since 1995, edited at Santhapuram, Kerala.",
+  path: "/about",
+});
 
 export default async function AboutPage() {
   const page = await getPage("about");

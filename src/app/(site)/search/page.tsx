@@ -12,6 +12,7 @@ type SearchPageProps = {
 
 export const metadata: Metadata = {
   title: "Search",
+  robots: { index: false, follow: true },
 };
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {

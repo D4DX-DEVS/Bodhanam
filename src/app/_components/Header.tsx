@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, Sun, Moon, Search } from "lucide-react";
+import { Sun, Moon, Search } from "lucide-react";
 import BotanicalDecoration from "./BotanicalDecoration";
 import HeaderSearch from "./HeaderSearch";
 
@@ -31,7 +31,6 @@ function useMounted(): boolean {
 }
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const mounted = useMounted();
   const { resolvedTheme, setTheme } = useTheme();
@@ -137,19 +136,6 @@ export default function Header() {
                 )}
               </button>
             )}
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 hover:bg-primary hover:bg-opacity-5 rounded transition-colors duration-300"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? (
-                <X size={20} className="text-ink" strokeWidth={1.5} />
-              ) : (
-                <Menu size={20} className="text-ink" strokeWidth={1.5} />
-              )}
-            </button>
           </div>
         </div>
 
@@ -160,37 +146,6 @@ export default function Header() {
           </div>
         )}
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <nav className="md:hidden border-t animate-in fade-in slide-in-from-top-2 duration-200"
-            style={{ borderColor: "var(--border-subtle)" }}
-          >
-            <div className="px-0 py-4 space-y-1">
-              {navItems.map((item) => {
-                const active = isNavActive(pathname, item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`block px-4 py-2.5 text-sm font-medium hover:text-primary hover:bg-primary hover:bg-opacity-5 transition-colors duration-200 ${
-                      active ? "text-primary" : "text-ink"
-                    }`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-              <Link
-                href="/contact"
-                className="block px-4 py-2.5 text-sm font-medium text-ink hover:text-primary hover:bg-primary hover:bg-opacity-5 transition-colors duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
-            </div>
-          </nav>
-        )}
       </div>
 
     </header>

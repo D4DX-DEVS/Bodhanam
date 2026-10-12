@@ -3,15 +3,21 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { User } from "lucide-react";
 import Pagination from "@/app/_components/Pagination";
-
-export const metadata: Metadata = {
-  title: "Authors",
-  description: "Contributors to Bodhanam Quarterly",
-};
+import { pageMeta } from "@/lib/seo";
 
 type Props = {
   searchParams: Promise<{ page?: string }>;
 };
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { page } = await searchParams;
+  const pageNum = page ? parseInt(page) : 1;
+  return pageMeta({
+    title: pageNum > 1 ? `Authors — Page ${pageNum}` : "Authors",
+    description: "Scholars and writers who have contributed to ബോധനം (Bodhanam) Malayalam Islamic quarterly.",
+    path: pageNum > 1 ? `/authors?page=${pageNum}` : "/authors",
+  });
+}
 
 export default async function AuthorsPage({ searchParams }: Props) {
   const { page } = await searchParams;

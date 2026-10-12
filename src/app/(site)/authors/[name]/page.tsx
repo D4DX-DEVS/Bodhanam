@@ -4,19 +4,28 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { User } from "lucide-react";
 import Pagination from "@/app/_components/Pagination";
+import JsonLd from "@/app/_components/JsonLd";
+import { absUrl, articlePath, authorPath, pageMeta } from "@/lib/seo";
 
 type Props = {
   params: Promise<{ name: string }>;
   searchParams: Promise<{ page?: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { name } = await params;
+  const { page } = await searchParams;
   const authorName = decodeURIComponent(name);
-  return {
-    title: authorName,
-    description: `Articles by ${authorName} in Bodhanam Quarterly`,
-  };
+  const pageNum = page ? parseInt(page) : 1;
+  const { total } = await getArticlesByAuthorPaged(authorName, pageNum, 12);
+  const base = authorPath(authorName);
+  return pageMeta({
+    title: pageNum > 1 ? `${authorName} — Page ${pageNum}` : authorName,
+    description: `${total} ${total === 1 ? "article" : "articles"} by ${authorName} in ബോധനം (Bodhanam) Malayalam Islamic quarterly.`,
+    path: pageNum > 1 ? `${base}?page=${pageNum}` : base,
+    type: "profile",
+    noindex: total === 0,
+  });
 }
 
 export default async function AuthorPage({ params, searchParams }: Props) {
@@ -31,8 +40,27 @@ export default async function AuthorPage({ params, searchParams }: Props) {
     12
   );
 
+  const profileUrl = absUrl(authorPath(authorName));
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    url: profileUrl,
+    mainEntity: {
+      "@type": "Person",
+      "@id": `${profileUrl}#person`,
+      name: authorName,
+      url: profileUrl,
+    },
+    hasPart: articles.map((a) => ({
+      "@type": "ScholarlyArticle",
+      url: absUrl(articlePath(a.id)),
+      name: a.title,
+    })),
+  };
+
   return (
     <div className="min-h-screen">
+      {total > 0 && <JsonLd data={jsonLd} />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
         <div className="mb-12 flex items-center gap-4 md:mb-16">
           <span

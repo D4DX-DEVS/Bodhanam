@@ -467,7 +467,34 @@ h3 {
   animation: shimmer 1.4s ease-in-out infinite;
 }
 
+/* Images shimmer until loaded (ImageShimmer sets data-loaded). The gradient
+   is the img's own background, so the loaded picture paints over it. */
+main img:not([data-loaded]) {
+  background-color: var(--border-subtle);
+  background-image: linear-gradient(
+    90deg,
+    var(--border-subtle) 0%,
+    var(--border) 50%,
+    var(--border-subtle) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+main img[data-loaded] {
+  animation: img-in 0.35s ease-out;
+}
+
+@keyframes img-in {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  main img:not([data-loaded]),
+  main img[data-loaded] {
+    animation: none;
+  }
   .skeleton {
     animation: none;
   }

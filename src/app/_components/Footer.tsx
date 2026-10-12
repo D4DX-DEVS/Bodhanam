@@ -21,7 +21,7 @@ function ContactBlock({
   contact: { address?: string; phone?: string; email?: string };
 }) {
   return (
-    <div>
+    <div className="hidden sm:block">
       <h4 className="font-sans-ml font-bold mb-4 text-sm uppercase tracking-widest text-[var(--footer-ink)]">
         {label}
       </h4>
@@ -62,7 +62,7 @@ export default async function Footer() {
 
   return (
     <footer
-      className="relative overflow-hidden"
+      className="relative overflow-hidden pb-24 md:pb-0"
       style={{ backgroundColor: "var(--footer-bg)", color: "var(--footer-ink)" }}
     >
       <BotanicalDecoration
@@ -71,16 +71,16 @@ export default async function Footer() {
       />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-10 mb-8 md:mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 sm:gap-8 md:gap-10 mb-5 sm:mb-8 md:mb-10">
           <div>
-            <h3 className="font-serif-ml text-2xl md:text-3xl font-bold mb-3">ബോധനം</h3>
-            <p className="text-sm md:text-base leading-relaxed" style={{ color: "var(--footer-muted)" }}>
+            <h3 className="font-serif-ml text-xl sm:text-2xl md:text-3xl font-bold mb-2 sm:mb-3">ബോധനം</h3>
+            <p className="text-xs sm:text-sm md:text-base leading-relaxed" style={{ color: "var(--footer-muted)" }}>
               An Islamic quarterly journal exploring contemporary scholarship, spirituality, and
               thought.
             </p>
           </div>
 
-          <div>
+          <div className="hidden sm:block">
             <h4 className="font-sans-ml font-bold mb-4 text-sm uppercase tracking-widest">
               Explore
             </h4>
@@ -98,7 +98,7 @@ export default async function Footer() {
             </div>
           </div>
 
-          <div>
+          <div className="hidden sm:block">
             <h4 className="font-sans-ml font-bold mb-4 text-sm uppercase tracking-widest">
               Information
             </h4>
@@ -124,8 +124,8 @@ export default async function Footer() {
           )}
         </div>
 
-        <div className="border-t pt-6 md:pt-8" style={{ borderColor: "var(--footer-border)" }}>
-          <div className="text-center text-xs md:text-sm space-y-2" style={{ color: "var(--footer-muted)" }}>
+        <div className="border-t pt-4 sm:pt-6 md:pt-8" style={{ borderColor: "var(--footer-border)" }}>
+          <div className="text-center text-xs md:text-sm space-y-1 sm:space-y-2" style={{ color: "var(--footer-muted)" }}>
             <p>© 2026 · Bodhanam Quarterly · All rights reserved</p>
             <p>
               Developed by{" "}
