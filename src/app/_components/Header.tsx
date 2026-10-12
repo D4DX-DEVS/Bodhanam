@@ -37,15 +37,14 @@ export default function Header() {
   const isDark = resolvedTheme === "dark";
   const pathname = usePathname();
 
-  // Tall header at top of page, compact sticky header once scrolled —
-  // mirrors the original bodhanam.net two-state header.
+  // Tall header at top of page, compact once scrolled — mirrors the original
+  // bodhanam.net two-state header. The header's box never changes height
+  // (that reflowed the whole page and jolted content mid-scroll): it is tall
+  // and sticks at a negative top, so its upper strip simply scrolls away.
+  // Only transforms animate (logo scale, row re-centering) — GPU-composited.
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    // Hysteresis: shrink past 80px, expand only back under 20px. A single
-    // threshold flickers — shrinking the header shortens the page, scrollY
-    // dips back below the threshold, and the header oscillates.
-    const onScroll = () =>
-      setScrolled((prev) => (prev ? window.scrollY > 20 : window.scrollY > 80));
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -53,7 +52,8 @@ export default function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 backdrop-blur-md border-b-2"
+      // -top = tall minus compact height (80-56 / 96-64): the part that scrolls off
+      className="sticky -top-6 md:-top-8 z-50 backdrop-blur-md border-b-2"
       style={{
         backgroundColor: "var(--header-bg)",
         borderColor: "var(--primary)",
@@ -66,9 +66,12 @@ export default function Header() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Fixed tall box; the compact-height row sits at its bottom (the part
+            that stays visible) and is nudged up to look centered at page top. */}
+        <div className="flex h-20 items-end md:h-24">
         <div
-          className={`flex items-center justify-between transition-[height] duration-300 ${
-            scrolled ? "h-14 md:h-16" : "h-20 md:h-24"
+          className={`flex h-14 w-full items-center justify-between transition-transform duration-300 ease-out md:h-16 ${
+            scrolled ? "translate-y-0" : "-translate-y-3 md:-translate-y-4"
           }`}
         >
           {/* Logo with image */}
@@ -82,8 +85,8 @@ export default function Header() {
               height={56}
               width={227}
               priority
-              className={`w-auto transition-all duration-300 ${
-                scrolled ? "h-9 md:h-10" : "h-12 md:h-16"
+              className={`h-12 w-auto origin-left transition-transform duration-300 ease-out md:h-16 ${
+                scrolled ? "scale-75 md:scale-[0.625]" : "scale-100"
               }`}
             />
           </Link>
@@ -137,6 +140,7 @@ export default function Header() {
               </button>
             )}
           </div>
+        </div>
         </div>
 
         {/* Mobile search field */}
