@@ -1,5 +1,34 @@
 import { db } from "./db";
+import { unstable_cache } from "next/cache";
 import { htmlToExcerpt } from "./text";
+
+/** Tag on every cached public query; admin mutations expire it. */
+export const CONTENT_TAG = "content";
+
+// Server data cache: public pages hit Mongo at most once per hour per query
+// (or right after an admin edit expires CONTENT_TAG). Results are
+// JSON-serialized, so Date fields come back as strings — don't render them.
+function cached<A extends unknown[], R>(
+  fn: (...args: A) => Promise<R>,
+  key: string
+): (...args: A) => Promise<R> {
+  return unstable_cache(fn, ["data", key], { tags: [CONTENT_TAG], revalidate: 3600 });
+}
+
+// Full bodies are large (Malayalam HTML, ~60KB each) and pulling a whole
+// issue's worth took ~7s. Mongo trims each body to its head server-side, so
+// only a few KB per article cross the wire; the excerpt result is cached.
+const EXCERPT_SOURCE_CHARS = 2500;
+
+const getDerivedExcerpts = cached(async (ids: number[]) => {
+  const rows = (await db.article.aggregateRaw({
+    pipeline: [
+      { $match: { _id: { $in: ids } } },
+      { $project: { head: { $substrCP: ["$bodyHtml", 0, EXCERPT_SOURCE_CHARS] } } },
+    ],
+  })) as unknown as Array<{ _id: number; head: string | null }>;
+  return rows.map((r): [number, string] => [r._id, htmlToExcerpt((r.head ?? "").replace(/<[^>]*$/, ""))]); // drop a tag cut mid-way
+}, "getDerivedExcerpts");
 
 /**
  * Fill missing excerpts from article bodies (one query for the missing ids)
@@ -10,13 +39,7 @@ export async function withDerivedExcerpts<
 >(articles: T[]): Promise<T[]> {
   const missing = articles.filter((a) => !a.excerpt?.trim()).map((a) => a.id);
   if (missing.length === 0) return articles;
-  const bodies = await db.article.findMany({
-    where: { id: { in: missing } },
-    select: { id: true, bodyHtml: true },
-  });
-  const derived = new Map(
-    bodies.map((b) => [b.id, htmlToExcerpt(b.bodyHtml)])
-  );
+  const derived = new Map(await getDerivedExcerpts(missing));
   return articles.map((a) =>
     a.excerpt?.trim() ? a : { ...a, excerpt: derived.get(a.id) || null }
   );
@@ -45,7 +68,7 @@ const VISIBLE_ARTICLE = {
 
 // ============ PUBLIC QUERIES (PUBLISHED ISSUES ONLY) ============
 
-export async function getLatestIssue() {
+async function _getLatestIssue() {
   return db.issue.findFirst({
     where: { published: true },
     orderBy: { id: "desc" },
@@ -59,7 +82,7 @@ export async function getLatestIssue() {
   });
 }
 
-export async function getIssues() {
+async function _getIssues() {
   return db.issue.findMany({
     where: { published: true },
     orderBy: { id: "desc" },
@@ -70,7 +93,7 @@ export async function getIssues() {
  * Lean recent-issues query for the homepage archive strip: cover + article
  * count only, without loading every article (avoids a huge over-fetch).
  */
-export async function getRecentIssuesForPreview(n: number) {
+async function _getRecentIssuesForPreview(n: number) {
   return db.issue.findMany({
     where: { published: true },
     orderBy: { id: "desc" },
@@ -79,7 +102,7 @@ export async function getRecentIssuesForPreview(n: number) {
   });
 }
 
-export async function getIssue(id: number) {
+async function _getIssue(id: number) {
   return db.issue.findUnique({
     where: { id, published: true },
     include: {
@@ -95,7 +118,7 @@ export async function getIssue(id: number) {
 /**
  * Get article - returns null if article's issue is not published (triggers 404)
  */
-export async function getArticle(id: number) {
+async function _getArticle(id: number) {
   const article = await db.article.findUnique({
     where: { id },
     include: { issue: true },
@@ -112,7 +135,7 @@ export async function getArticle(id: number) {
 /**
  * Get articles from published issue only
  */
-export async function getIssueArticles(issueId: number) {
+async function _getIssueArticles(issueId: number) {
   return db.article.findMany({
     where: { issueId, issue: { published: true }, ...VISIBLE_ARTICLE },
     omit: { bodyHtml: true },
@@ -140,7 +163,7 @@ export async function getAdjacentArticles(article: {
   };
 }
 
-export async function getPage(slug: string) {
+async function _getPage(slug: string) {
   return db.page.findUnique({
     where: { slug },
   });
@@ -152,7 +175,7 @@ interface ContactValue {
   team?: string[];
 }
 
-export async function getContact() {
+async function _getContact() {
   const setting = await db.setting.findUnique({
     where: { key: "contact" },
   });
@@ -174,7 +197,7 @@ export async function getContact() {
 /**
  * Get recent articles from published issues only
  */
-export async function getRecentArticles(n: number) {
+async function _getRecentArticles(n: number) {
   return db.article.findMany({
     where: { issue: { published: true }, ...VISIBLE_ARTICLE },
     omit: { bodyHtml: true },
@@ -191,7 +214,7 @@ function issueYear(period: string): string {
 /**
  * Distinct years among published issues, newest first ("Undated" last)
  */
-export async function getAvailableIssueYears(): Promise<string[]> {
+async function _getAvailableIssueYears(): Promise<string[]> {
   const issues = await db.issue.findMany({
     where: { published: true },
     select: { period: true },
@@ -207,7 +230,7 @@ export async function getAvailableIssueYears(): Promise<string[]> {
 /**
  * Paginated published issues, optionally filtered by free-text query and/or year
  */
-export async function searchIssuesPaged(
+async function _searchIssuesPaged(
   query: string,
   year: string,
   page: number = 1,
@@ -263,7 +286,7 @@ export async function searchIssuesPaged(
 /**
  * Search articles in published issues only, with pagination
  */
-export async function searchArticlesPaged(
+async function _searchArticlesPaged(
   query: string,
   page: number = 1,
   perPage: number = 12,
@@ -283,15 +306,17 @@ export async function searchArticlesPaged(
       { bodyHtml: { contains: q, mode: "insensitive" as const } },
     ],
   };
-  const total = await db.article.count({ where });
-  const items = await db.article.findMany({
-    where,
-    include: { issue: true },
-    omit: { bodyHtml: true },
-    orderBy: { id: "desc" },
-    skip,
-    take: perPage,
-  });
+  const [total, items] = await Promise.all([
+    db.article.count({ where }),
+    db.article.findMany({
+      where,
+      include: { issue: true },
+      omit: { bodyHtml: true },
+      orderBy: { id: "desc" },
+      skip,
+      take: perPage,
+    }),
+  ]);
 
   const totalPages = Math.ceil(total / perPage);
 
@@ -305,7 +330,7 @@ export async function searchArticlesPaged(
 }
 
 /** Distinct categories across published articles, for the search filter. */
-export async function getSearchCategories(): Promise<string[]> {
+async function _getSearchCategories(): Promise<string[]> {
   const rows = await db.article.findMany({
     where: { issue: { published: true }, ...VISIBLE_ARTICLE, category: { not: null } },
     select: { category: true },
@@ -320,7 +345,7 @@ export async function getSearchCategories(): Promise<string[]> {
 /**
  * Distinct authors across published-issue articles, with per-author article count
  */
-export async function getAuthorsPaged(page: number = 1, perPage: number = 24) {
+async function _getAuthorsPaged(page: number = 1, perPage: number = 24) {
   const articles = await db.article.findMany({
     where: { author: { not: null }, issue: { published: true }, ...VISIBLE_ARTICLE },
     select: { author: true },
@@ -354,28 +379,51 @@ export async function getAuthorsPaged(page: number = 1, perPage: number = 24) {
 /**
  * Paginated articles by a given author, across all published issues
  */
-export async function getArticlesByAuthorPaged(
+async function _getArticlesByAuthorPaged(
   authorName: string,
   page: number = 1,
   perPage: number = 12
 ) {
   const normalized = normalizeCategoryName(authorName);
+  return pageByNormalizedField("author", normalized, page, perPage);
+}
 
-  // ponytail: normalized match must happen in JS (Unicode ZWJ variants);
-  // store a normalized authorKey field if article count grows past ~5k.
+/**
+ * Paginate articles whose author/category matches after Unicode normalization.
+ * The match must run in JS (ZWJ variants), so only id + field are scanned for
+ * every article; full rows are loaded for the current page alone.
+ */
+async function pageByNormalizedField(
+  field: "author" | "category",
+  normalized: string,
+  page: number,
+  perPage: number
+) {
+  // ponytail: store a normalized key field if article count grows past ~5k.
+  const where = { [field]: { not: null }, issue: { published: true }, ...VISIBLE_ARTICLE };
   const candidates = await db.article.findMany({
-    where: { author: { not: null }, issue: { published: true }, ...VISIBLE_ARTICLE },
-    omit: { bodyHtml: true },
-    include: { issue: true },
+    where,
+    select: { id: true, author: true, category: true },
     orderBy: { id: "desc" },
   });
-  const matched = candidates.filter(
-    (a) => a.author && normalizeCategoryName(a.author) === normalized
-  );
+  const matchedIds = candidates
+    .filter((a) => {
+      const v = a[field];
+      return v && normalizeCategoryName(v) === normalized;
+    })
+    .map((a) => a.id);
 
-  const total = matched.length;
+  const total = matchedIds.length;
   const skip = (page - 1) * perPage;
-  const items = matched.slice(skip, skip + perPage);
+  const pageIds = matchedIds.slice(skip, skip + perPage);
+  const items = pageIds.length
+    ? await db.article.findMany({
+        where: { id: { in: pageIds } },
+        omit: { bodyHtml: true },
+        include: { issue: true },
+        orderBy: { id: "desc" },
+      })
+    : [];
 
   return {
     items,
@@ -391,13 +439,16 @@ export async function getArticlesByAuthorPaged(
 /**
  * Get all columns ordered by column order
  */
+const cachedColumns = cached(
+  () => db.column.findMany({ orderBy: { order: "asc" } }),
+  "getColumns"
+);
+
 export async function getColumns() {
   try {
-    return await db.column.findMany({
-      orderBy: { order: "asc" },
-    });
+    return await cachedColumns();
   } catch {
-    return []; // ponytail: DB blip → empty nav, not a dead site
+    return []; // ponytail: DB blip → empty nav, not a dead site (not cached)
   }
 }
 
@@ -421,34 +472,13 @@ export async function getCoverStories(issueId: number) {
 /**
  * Get paginated articles matching a category/topic name, across all published issues
  */
-export async function getArticlesByCategoryPaged(
+async function _getArticlesByCategoryPaged(
   categoryName: string,
   page: number = 1,
   perPage: number = 12
 ) {
   const normalized = normalizeCategoryName(categoryName);
-
-  const candidates = await db.article.findMany({
-    where: { category: { not: null }, issue: { published: true }, ...VISIBLE_ARTICLE },
-    omit: { bodyHtml: true },
-    include: { issue: true },
-    orderBy: { id: "desc" },
-  });
-  const matched = candidates.filter(
-    (a) => a.category && normalizeCategoryName(a.category) === normalized
-  );
-
-  const total = matched.length;
-  const skip = (page - 1) * perPage;
-  const items = matched.slice(skip, skip + perPage);
-
-  return {
-    items,
-    total,
-    page,
-    perPage,
-    totalPages: Math.ceil(total / perPage),
-  };
+  return pageByNormalizedField("category", normalized, page, perPage);
 }
 
 /**
@@ -474,3 +504,23 @@ export async function getColumnArticles(issueId: number, columnName: string) {
       )
     );
 }
+
+// ============ CACHED EXPORTS ============
+
+export const getLatestIssue = cached(_getLatestIssue, "getLatestIssue");
+export const getIssues = cached(_getIssues, "getIssues");
+export const getRecentIssuesForPreview = cached(_getRecentIssuesForPreview, "getRecentIssuesForPreview");
+export const getIssue = cached(_getIssue, "getIssue");
+export const getArticle = cached(_getArticle, "getArticle");
+export const getIssueArticles = cached(_getIssueArticles, "getIssueArticles");
+export const getRecentArticles = cached(_getRecentArticles, "getRecentArticles");
+export const getPage = cached(_getPage, "getPage");
+export const getContact = cached(_getContact, "getContact");
+export const getAvailableIssueYears = cached(_getAvailableIssueYears, "getAvailableIssueYears");
+export const searchIssuesPaged = cached(_searchIssuesPaged, "searchIssuesPaged");
+export const getSearchCategories = cached(_getSearchCategories, "getSearchCategories");
+export const getAuthorsPaged = cached(_getAuthorsPaged, "getAuthorsPaged");
+export const getArticlesByAuthorPaged = cached(_getArticlesByAuthorPaged, "getArticlesByAuthorPaged");
+export const getArticlesByCategoryPaged = cached(_getArticlesByCategoryPaged, "getArticlesByCategoryPaged");
+// Body search is a full scan; repeat searches (and pagination back/forth) hit the cache.
+export const searchArticlesPaged = cached(_searchArticlesPaged, "searchArticlesPaged");

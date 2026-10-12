@@ -19,6 +19,21 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
     issue.articles.map((a) => a.author).filter((a): a is string => Boolean(a))
   ).size;
 
+  const exploreCta = (className = "") => (
+    <Link
+      href={`/issue/${issue.id}`}
+      className={`btn-primary group/cta inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium sm:gap-2 sm:px-5 ${className}`}
+    >
+      Explore the Issue
+      <ArrowRight
+        size={16}
+        strokeWidth={2}
+        className="transition-transform duration-200 group-hover/cta:translate-x-0.5"
+      />
+    </Link>
+  );
+  const cta = exploreCta();
+
   return (
     <section className="py-5 md:py-6">
       <div
@@ -31,11 +46,11 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
           className="hidden lg:block absolute -right-8 -top-6 h-56 w-56 opacity-70"
         />
 
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center">
+        <div className="relative grid grid-cols-[7rem_1fr] items-center gap-x-4 gap-y-4 sm:flex sm:flex-row sm:gap-6">
           {/* Cover */}
           <Link
             href={`/issue/${issue.id}`}
-            className="group mx-auto block w-36 shrink-0 sm:w-40 lg:mx-0"
+            className="group block w-full shrink-0 sm:w-40"
           >
             <div
               className="overflow-hidden rounded-lg shadow-lg"
@@ -50,9 +65,9 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
           </Link>
 
           {/* Meta + CTAs */}
-          <div className="min-w-0 flex-1 text-center lg:max-w-md lg:text-left">
+          <div className="min-w-0 flex-1 text-left lg:max-w-md">
             <span
-              className="mb-3 inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-primary"
+              className="mb-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-[0.15em] text-primary sm:mb-3 sm:px-3 sm:py-1 sm:text-xs sm:tracking-[0.2em]"
               style={{ borderColor: "var(--border)" }}
             >
               Latest Issue
@@ -64,7 +79,7 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
               Vol. {issue.volume} · Issue {issue.issueNo}
             </p>
 
-            <div className="mt-4 flex justify-center gap-6 lg:justify-start">
+            <div className="mt-3 flex gap-4 sm:mt-4 sm:gap-6">
               <div className="flex items-center gap-2">
                 <FileText size={18} className="text-primary" strokeWidth={1.75} />
                 <div className="text-left">
@@ -81,20 +96,13 @@ export default function LatestIssueHero({ issue, mugavurapArticle }: LatestIssue
               </div>
             </div>
 
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-start">
-              <Link
-                href={`/issue/${issue.id}`}
-                className="btn-primary group/cta inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium"
-              >
-                Explore the Issue
-                <ArrowRight
-                  size={16}
-                  strokeWidth={2}
-                  className="transition-transform duration-200 group-hover/cta:translate-x-0.5"
-                />
-              </Link>
+            <div className="mt-5 hidden gap-3 sm:flex">
+              {cta}
             </div>
           </div>
+
+          {/* Mobile: CTA spans both columns so the cover matches the details height */}
+          <div className="col-span-2 sm:hidden">{exploreCta("w-full")}</div>
 
           {/* Mugavurap (editorial) excerpt */}
           {mugavurapArticle && (

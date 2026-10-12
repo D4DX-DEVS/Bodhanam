@@ -41,7 +41,7 @@ export default function YearSelect({ years, initial }: YearSelectProps) {
         value={value}
         onValueChange={handleChange}
         options={options}
-        className="min-w-[140px]"
+        className="w-[7.5rem] shrink-0 sm:w-auto sm:min-w-[140px]"
       />
     </>
   );

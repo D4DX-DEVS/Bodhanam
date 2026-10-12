@@ -37,11 +37,20 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Client router cache: back/forward and revisiting a page within these
+    // windows reuses the already-rendered page instead of refetching it.
+    // Admin server actions call revalidatePath, which clears it immediately.
+    staleTimes: { dynamic: 60, static: 300 },
+  },
   images: {
     unoptimized: true,
   },
   headers: async () => [
     { source: "/:path*", headers: securityHeaders },
+    // admin is a client layout (no metadata export) — keep it out of every index
+    { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+    { source: "/admin", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
   ],
   redirects: async () => [
     // old canonical stays /articles/show/:id; catch links to the short-lived /article/:id path

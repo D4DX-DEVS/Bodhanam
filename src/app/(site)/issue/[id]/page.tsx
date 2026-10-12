@@ -3,6 +3,8 @@ import Media, { DEFAULT_IMAGE } from "@/app/_components/Media";
 import Link from "next/link";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import JsonLd from "@/app/_components/JsonLd";
+import { absUrl, articlePath, breadcrumb, issueNode, issuePath, pageMeta } from "@/lib/seo";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -13,12 +15,43 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const issue = await getIssue(parseInt(id));
 
   if (!issue) {
-    return { title: "Not Found" };
+    return { title: "Not Found", robots: { index: false } };
   }
 
+  const titles = issue.articles.slice(0, 4).map((a) => a.title).join(", ");
+  return pageMeta({
+    title: `Vol ${issue.volume} · Issue ${issue.issueNo} (${issue.period})`,
+    description:
+      issue.description ||
+      `ബോധനം ${issue.period} — ${issue.articles.length} articles: ${titles}`,
+    path: issuePath(issue.id),
+    image: issue.coverImage,
+  });
+}
+
+type IssueWithArticles = NonNullable<Awaited<ReturnType<typeof getIssue>>>;
+
+function issueJsonLd(issue: IssueWithArticles) {
+  const label = `Vol ${issue.volume ?? "?"} · Issue ${issue.issueNo ?? "?"}`;
   return {
-    title: `Vol ${issue.volume} · Issue ${issue.issueNo}`,
-    description: `${issue.period} · ${issue.articles.length} articles`,
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        ...issueNode(issue),
+        hasPart: issue.articles.map((a) => ({
+          "@type": "ScholarlyArticle",
+          "@id": `${absUrl(articlePath(a.id))}#article`,
+          url: absUrl(articlePath(a.id)),
+          name: a.title,
+          ...(a.author && { author: { "@type": "Person", name: a.author } }),
+        })),
+      },
+      breadcrumb([
+        { name: "Home", path: "/" },
+        { name: "Archives", path: "/archives" },
+        { name: label, path: issuePath(issue.id) },
+      ]),
+    ],
   };
 }
 
@@ -52,6 +85,7 @@ export default async function IssuePage({ params }: Props) {
 
   return (
     <div className="min-h-screen">
+      <JsonLd data={issueJsonLd(issue)} />
       {/* Issue Header */}
       <section>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 md:pt-14 lg:pt-16 pb-4 md:pb-6">

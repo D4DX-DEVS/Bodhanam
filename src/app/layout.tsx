@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Noto_Serif_Malayalam, Noto_Sans_Malayalam, Poppins } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
+import JsonLd from "./_components/JsonLd";
+import {
+  DEFAULT_OG_IMAGE, SITE_DESCRIPTION, SITE_LOCALE, SITE_NAME, SITE_NAME_SHORT, SITE_URL, siteGraph,
+} from "@/lib/seo";
 
 const notoSerifMalayalam = Noto_Serif_Malayalam({
   variable: "--font-serif-ml",
@@ -27,14 +31,43 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     template: "%s · ബോധനം",
-    default: "ബോധനം | Bodhanam Quarterly",
+    default: SITE_NAME,
   },
-  description:
-    "ബോധനം - A Malayalam Islamic quarterly research journal exploring scholarship, spirituality, and contemporary thought.",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME_SHORT,
+  keywords: [
+    "Bodhanam", "ബോധനം", "Malayalam Islamic journal", "Islamic quarterly",
+    "Islamic research Malayalam", "Quran", "Hadith", "Fiqh", "ഇസ്‌ലാം", "ഖുർആൻ",
+  ],
   icons: {
     icon: "/images/icon.png",
+    apple: "/images/icon.png",
+  },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: SITE_LOCALE,
+    images: [{ url: DEFAULT_OG_IMAGE, alt: SITE_NAME }],
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+    other: process.env.BING_SITE_VERIFICATION
+      ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION }
+      : undefined,
+  },
+  alternates: {
+    types: { "text/plain": "/llms.txt" },
   },
 };
 
@@ -50,6 +83,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-paper text-ink antialiased">
+        <JsonLd data={siteGraph()} />
         {/* Start every fresh load at the top. Next's App Router only scrolls on
             client navigations, so on reload the browser's native "auto" restore
             drops you back to the old offset — onto the loading skeleton. */}

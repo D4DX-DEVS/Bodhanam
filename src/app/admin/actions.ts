@@ -3,10 +3,19 @@
 import { verifyLogin, createSession, destroySession, getSession } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CONTENT_TAG } from "@/lib/data";
+import { htmlToExcerpt } from "@/lib/text";
 import { headers } from "next/headers";
 import { sanitizeArticleHtml } from "@/lib/sanitize";
 import { rateLimit } from "@/lib/rateLimit";
+
+// Store a derived excerpt when the editor leaves it blank, so public pages
+// never have to load article bodies just to show a card description.
+function withBodyAndExcerpt(bodyHtml: string, excerpt: string | null) {
+  const clean = sanitizeArticleHtml(bodyHtml);
+  return { bodyHtml: clean, excerpt: excerpt?.trim() ? excerpt : htmlToExcerpt(clean) || null };
+}
 
 export async function loginAction(
   email: string,
@@ -90,6 +99,8 @@ export async function createIssueAction(data: {
     },
   });
 
+  revalidateTag(CONTENT_TAG, { expire: 0 });
+
   revalidatePath("/admin/issues");
   revalidatePath("/");
   return issue;
@@ -114,6 +125,8 @@ export async function updateIssueAction(
     data,
   });
 
+  revalidateTag(CONTENT_TAG, { expire: 0 });
+
   revalidatePath("/admin/issues");
   revalidatePath(`/issue/${id}`);
   revalidatePath("/");
@@ -129,6 +142,8 @@ export async function setIssuePublishedAction(id: number, published: boolean) {
     data: { published },
   });
 
+  revalidateTag(CONTENT_TAG, { expire: 0 });
+
   revalidatePath("/admin/issues");
   revalidatePath(`/issue/${id}`);
   revalidatePath("/");
@@ -142,6 +157,8 @@ export async function deleteIssueAction(id: number) {
   await db.issue.delete({
     where: { id },
   });
+
+  revalidateTag(CONTENT_TAG, { expire: 0 });
 
   revalidatePath("/admin/issues");
   revalidatePath("/");
@@ -174,9 +191,11 @@ export async function createArticleAction(data: {
     data: {
       id: nextId,
       ...data,
-      bodyHtml: sanitizeArticleHtml(data.bodyHtml),
+      ...withBodyAndExcerpt(data.bodyHtml, data.excerpt),
     },
   });
+
+  revalidateTag(CONTENT_TAG, { expire: 0 });
 
   revalidatePath("/admin/articles");
   revalidatePath(`/issue/${data.issueId}`);
@@ -214,9 +233,11 @@ export async function updateArticleAction(
     where: { id },
     data: {
       ...data,
-      bodyHtml: sanitizeArticleHtml(data.bodyHtml),
+      ...withBodyAndExcerpt(data.bodyHtml, data.excerpt),
     },
   });
+
+  revalidateTag(CONTENT_TAG, { expire: 0 });
 
   revalidatePath("/admin/articles");
   revalidatePath(`/issue/${oldArticle?.issueId}`);
@@ -237,6 +258,8 @@ export async function deleteArticleAction(id: number) {
   await db.article.delete({
     where: { id },
   });
+
+  revalidateTag(CONTENT_TAG, { expire: 0 });
 
   revalidatePath("/admin/articles");
   if (article) {
@@ -263,6 +286,8 @@ export async function updatePageAction(
     create: { slug, ...sanitizedData },
   });
 
+  revalidateTag(CONTENT_TAG, { expire: 0 });
+
   revalidatePath("/admin/pages");
   revalidatePath(`/${slug}`);
   return page;
@@ -280,6 +305,8 @@ export async function updateSettingAction(
     update: { value },
     create: { key, value },
   });
+
+  revalidateTag(CONTENT_TAG, { expire: 0 });
 
   revalidatePath("/admin/settings");
   revalidatePath("/");
