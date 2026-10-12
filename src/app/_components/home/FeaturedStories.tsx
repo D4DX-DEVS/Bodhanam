@@ -18,7 +18,9 @@ export default function FeaturedStories({
   // ponytail: max 4 cover stories; right column static, only left feature cycles
   const items = stories.slice(0, 4);
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [keyFocused, setKeyFocused] = useState(false);
+  const paused = hovered || keyFocused;
   const touchX = useRef<number | null>(null);
 
   if (items.length === 0) return null;
@@ -47,10 +49,14 @@ export default function FeaturedStories({
           aria-roledescription="carousel"
           aria-label="Cover stories"
           tabIndex={0}
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-          onFocus={() => setPaused(true)}
-          onBlur={() => setPaused(false)}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          // Only keyboard focus pauses; a mouse click on an arrow must not
+          // leave autoplay stuck once the pointer moves away.
+          onFocus={(e) => setKeyFocused(e.target.matches(":focus-visible"))}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setKeyFocused(false);
+          }}
           onKeyDown={(e) => {
             if (e.key === "ArrowLeft") go(index - 1);
             if (e.key === "ArrowRight") go(index + 1);
@@ -155,7 +161,11 @@ export default function FeaturedStories({
                         key={index}
                         className="absolute inset-0 origin-left rounded-full bg-white motion-reduce:hidden"
                         style={{
-                          animation: `slide-progress ${SLIDE_MS}ms linear forwards`,
+                          // longhands: React warns when shorthand + longhand mix
+                          animationName: "slide-progress",
+                          animationDuration: `${SLIDE_MS}ms`,
+                          animationTimingFunction: "linear",
+                          animationFillMode: "forwards",
                           animationPlayState: paused ? "paused" : "running",
                         }}
                         onAnimationEnd={() => go(index + 1)}
